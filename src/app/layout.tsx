@@ -1,0 +1,37 @@
+import type { Metadata, Viewport } from "next";
+import { aramaMotorlarinaAcik, site, siteAdresi } from "@/config/site";
+import { SiteAlt } from "@/components/SiteAlt";
+import { SiteBaslik } from "@/components/SiteBaslik";
+import { denemeModundaMi } from "@/lib/odeme";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  metadataBase: new URL(siteAdresi()),
+  title: {
+    default: "Dilekto | Tüketici Hakem Heyeti dilekçesi hazırlayın",
+    template: "%s | Dilekto",
+  },
+  description:
+    "Bozuk ürün, kötü hizmet, gelmeyen sipariş veya kabul edilmeyen iade için Tüketici Hakem Heyeti dilekçenizi birkaç dakikada kendiniz hazırlayın. Ücretsiz uygunluk testi.",
+  applicationName: site.ad,
+  robots: aramaMotorlarinaAcik() ? { index: true, follow: true } : { index: false, follow: false },
+  openGraph: { siteName: site.ad, locale: "tr_TR", type: "website" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#1f56d6",
+  width: "device-width",
+  initialScale: 1,
+};
+
+export default function RootLayout({ children }: LayoutProps<"/">) {
+  return (
+    <html lang="tr" className="h-full antialiased">
+      <body className="flex min-h-full flex-col">
+        <SiteBaslik denemeModu={denemeModundaMi()} />
+        <main className="flex-1">{children}</main>
+        <SiteAlt />
+      </body>
+    </html>
+  );
+}

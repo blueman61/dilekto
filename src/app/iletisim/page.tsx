@@ -1,0 +1,24 @@
+import type { Metadata } from "next";
+import { site } from "@/config/site";
+import { SorumlulukNotu } from "@/components/Sorumluluk";
+
+export const metadata: Metadata = { title: "İletişim" };
+
+export default function IletisimSayfasi() {
+  return (
+    <div className="kapsayici max-w-2xl py-10">
+      <h1 className="text-3xl font-bold">İletişim</h1>
+      <div className="kart mt-6">
+        <p className="text-gri">Sitenin kullanımı, ödeme veya iade ile ilgili sorularınız için bize yazın:</p>
+        <a href={`mailto:${site.eposta}`} className="mt-3 inline-block text-xl font-semibold text-marka-700 underline">
+          {site.eposta}
+        </a>
+        <p className="mt-4 text-sm text-gri">
+          E-postanıza dilekçe sayfanızın adresini eklerseniz size daha hızlı yardımcı olabiliriz. Genellikle 1-2 iş
+          günü içinde yanıt veririz.
+        </p>
+      </div>
+      <SorumlulukNotu className="mt-6" />
+    </div>
+  );
+}

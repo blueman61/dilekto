@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@theme {
+  --color-marka-50: #eff5ff;
+  --color-marka-100: #dbe8fe;
+  --color-marka-200: #bfd5fe;
+  --color-marka-600: #1f56d6;
+  --color-marka-700: #1a45b0;
+  --color-marka-800: #1b3c8c;
+  --color-marka-900: #172f66;
+  --color-murekkep: #13203a;
+  --color-gri: #55617a;
+  --color-zemin: #f6f8fb;
+  --color-cizgi: #dfe4ec;
+  --color-basari: #127a4a;
+  --color-basari-zemin: #e8f6ee;
+  --color-uyari: #9a5b00;
+  --color-uyari-zemin: #fff5e0;
+  --color-hata: #b4231b;
+  --color-hata-zemin: #fdeceb;
+  --font-sans: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Times New Roman", "Liberation Serif", Georgia, serif;
+}
+
+html {
+  /* Hedef kitle için okunaklı, biraz büyük yazı */
+  font-size: 112.5%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: #ffffff;
+  color: var(--color-murekkep);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-marka-600);
+  outline-offset: 2px;
+}
+
+@layer components {
+  .dugme {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-marka-600 px-6 py-3 text-center font-semibold text-white shadow-sm transition hover:bg-marka-700 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .dugme-ikincil {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-marka-600 bg-white px-6 py-3 text-center font-semibold text-marka-700 transition hover:bg-marka-50 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .kart {
+    @apply rounded-2xl border border-cizgi bg-white p-5 sm:p-7;
+  }
+  .kutu-giris {
+    @apply block w-full rounded-xl border-2 border-cizgi bg-white px-4 py-3 text-base text-murekkep placeholder:text-gri/70 focus:border-marka-600 focus:outline-none;
+  }
+  .kapsayici {
+    @apply mx-auto w-full max-w-5xl px-4 sm:px-6;
+  }
+  .metin-sayfasi h2 {
+    @apply mt-8 mb-3 text-xl font-bold;
+  }
+  .metin-sayfasi h3 {
+    @apply mt-6 mb-2 text-lg font-semibold;
+  }
+  .metin-sayfasi p,
+  .metin-sayfasi li {
+    @apply mb-3 text-gri;
+  }
+  .metin-sayfasi ul {
+    @apply list-disc pl-6;
+  }
+  .metin-sayfasi ol {
+    @apply list-decimal pl-6;
+  }
+}
