@@ -60,7 +60,7 @@ describe("Gemini yeniden deneme", () => {
 
   it("hiçbiri yanıt vermezse YZ-BAGLANTI ile her denemenin ayrıntısını verir", async () => {
     yanitlar = Array.from({ length: 8 }, () => hata(500, "Internal error"));
-    const h = await saglayiciSec().uret(istek).catch((e) => e);
+    const h = (await saglayiciSec().uret(istek).catch((e) => e)) as { kod: string; detay: string[] };
     expect(h.kod).toBe("YZ-BAGLANTI");
     expect(h.detay.length).toBeGreaterThan(1);
   }, 30000);
