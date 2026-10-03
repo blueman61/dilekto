@@ -4,6 +4,7 @@ Tüketicilerin kendi dilekçelerini kolayca hazırlamasını sağlayan web uygul
 
 - Kurulum ve yayına alma: [docs/KURULUM.md](docs/KURULUM.md)
 - Gerçek ödemeye geçiş: [docs/ODEME.md](docs/ODEME.md)
+- Pazarlama planı (ilk 100 müşteri): [docs/PAZARLAMA-PLANI.md](docs/PAZARLAMA-PLANI.md)
 
 ## Nasıl çalışır?
 
@@ -31,6 +32,7 @@ Tüketicilerin kendi dilekçelerini kolayca hazırlamasını sağlayan web uygul
 | `src/lib/hatalar.ts` | Hata kodları ve kullanıcı mesajları |
 | `src/lib/robot.ts` | Robot koruması (Cloudflare Turnstile, isteğe bağlı) |
 | `src/content/genel.ts` | Tanıtım sayfalarının ortak metinleri (adımlar, SSS) |
+| `src/content/rehberler.ts` | Şikâyet türüne özel rehber sayfaları (ör. `/kargo-hasari-dilekcesi`) |
 | `src/lib/belge/` | PDF ve Word üretimi |
 | `supabase/kurulum.sql` | Veritabanı tablosu |
 | `testler/` | Otomatik testler |
@@ -40,6 +42,10 @@ Tüketicilerin kendi dilekçelerini kolayca hazırlamasını sağlayan web uygul
 1. `src/lib/dilekce-turleri/<yeni-tur>/index.ts` içinde `DilekceTuru` tanımla (bkz. `hakem-heyeti`).
 2. Kullanılacak kanun maddelerini resmî metinle doğrulayıp `src/lib/mevzuat.ts` listesine ekle.
 3. `src/lib/dilekce-turleri/index.ts` listesine ekle. `/olustur/<yeni-tur>` sayfası kendiliğinden oluşur.
+
+## Yeni rehber sayfası eklemek
+
+`src/content/rehberler.ts` listesine yeni bir kayıt ekleyin. Sayfa, site haritası ve "Dilekçe örnekleri" listesi kendiliğinden güncellenir. Testler; atıfların doğrulanmış listede olduğunu, bağlantıların ve başlık uzunluklarının geçerli olduğunu denetler.
 
 ## Geliştirme
 

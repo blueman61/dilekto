@@ -32,6 +32,8 @@ export interface Depo {
   getir(id: string): Promise<DilekceKaydi | null>;
   odemeIsle(id: string, odeme: NonNullable<DilekceKaydi["odeme"]>): Promise<void>;
   sil(id: string): Promise<void>;
+  /** Son "gun" günde oluşturulan ve ödenen dilekçe sayıları */
+  istatistik(gun: number): Promise<{ olusturulan: number; odenen: number }>;
   bugunOlusturulan(): Promise<number>;
   suresiDolanlariSil(): Promise<number>;
 }
@@ -139,6 +141,22 @@ class SupabaseDepo implements Depo {
     if (error) throw vtHatasi(error, "Silme", status);
   }
 
+  async istatistik(gun: number) {
+    const baslangic = new Date(Date.now() - gun * 86_400_000).toISOString();
+    const say = async (yalnizOdenen: boolean) => {
+      let sorgu = this.db
+        .from("dilekceler")
+        .select("id", { count: "exact" })
+        .gte("olusturma", baslangic)
+        .neq("tur", "durum-testi");
+      if (yalnizOdenen) sorgu = sorgu.eq("durum", "odendi");
+      const { count, error, status } = await sorgu.limit(1);
+      if (error) throw vtHatasi(error, "İstatistik", status);
+      return count ?? 0;
+    };
+    return { olusturulan: await say(false), odenen: await say(true) };
+  }
+
   async bugunOlusturulan() {
     const { count, error, status } = await this.db
       .from("dilekceler")
@@ -191,6 +209,12 @@ class BellekDepo implements Depo {
 
   async sil(id: string) {
     this.kayitlar.delete(id);
+  }
+
+  async istatistik(gun: number) {
+    const bas = new Date(Date.now() - gun * 86_400_000).toISOString();
+    const liste = [...this.kayitlar.values()].filter((k) => k.olusturma >= bas && k.tur !== "durum-testi");
+    return { olusturulan: liste.length, odenen: liste.filter((k) => k.durum === "odendi").length };
   }
 
   async bugunOlusturulan() {

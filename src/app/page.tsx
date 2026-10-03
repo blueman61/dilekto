@@ -68,12 +68,15 @@ export default function AnaSayfa() {
         <h2 className="text-2xl font-bold">Hangi sorunlar için?</h2>
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {SORUNLAR.map((s) => (
-            <div key={s.baslik} className="kart">
-              <h3 className="font-semibold">{s.baslik}</h3>
+            <Link key={s.baslik} href={`/${s.rehber}`} className="kart transition hover:border-marka-600">
+              <h3 className="font-semibold text-marka-700">{s.baslik}</h3>
               <p className="mt-1 text-gri">{s.metin}</p>
-            </div>
+            </Link>
           ))}
         </div>
+        <Link href="/dilekce-ornekleri" className="mt-6 inline-block font-semibold text-marka-700 underline">
+          Tüm dilekçe örnekleri
+        </Link>
       </section>
 
       {/* Nasıl çalışır */}

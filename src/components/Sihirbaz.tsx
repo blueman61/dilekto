@@ -73,6 +73,24 @@ function soruHatasi(s: Soru, d: string | string[] | undefined): string | null {
   return null;
 }
 
+/** Adresteki ?konu= ve ?alis= değerlerini, geçerliyse test cevaplarına çevirir. */
+function adrestenOnDolum(tur: NonNullable<ReturnType<typeof turGetir>>): Cevaplar {
+  try {
+    const p = new URLSearchParams(window.location.search);
+    const sonuc: Cevaplar = {};
+    const alis = p.get("alis");
+    if (alis === "internet" || alis === "magaza") sonuc.alisSekli = alis;
+    const konu = p.get("konu");
+    const konuSorusu = tur.testSorulari(sonuc).find((s) => s.id === "konu");
+    if (konu && konuSorusu?.tip === "secim" && konuSorusu.secenekler.some((x) => x.deger === konu)) {
+      sonuc.konu = konu;
+    }
+    return sonuc;
+  } catch {
+    return {};
+  }
+}
+
 export function Sihirbaz({ turId }: { turId: string }) {
   const tur = turGetir(turId)!;
   const router = useRouter();
@@ -86,7 +104,8 @@ export function Sihirbaz({ turId }: { turId: string }) {
   const [asama, setAsama] = useState<Asama>(
     kayit ? (kayit.asama === "gonderiliyor" ? "hikaye" : kayit.asama) : "test",
   );
-  const [test, setTest] = useState<Cevaplar>(kayit?.test ?? {});
+  // Rehber sayfalarından gelen bağlantılar konuyu önceden seçebilir (?konu=...&alis=...)
+  const [test, setTest] = useState<Cevaplar>(() => kayit?.test ?? adrestenOnDolum(tur));
   const [hikaye, setHikaye] = useState<Cevaplar>(kayit?.hikaye ?? {});
   const [sira, setSira] = useState(kayit?.sira ?? 0);
   const [hata, setHata] = useState<string | null>(null);

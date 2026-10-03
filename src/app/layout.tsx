@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { aramaMotorlarinaAcik, site, siteAdresi } from "@/config/site";
 import { SiteAlt } from "@/components/SiteAlt";
+import { Olcum } from "@/components/Olcum";
 import { SiteBaslik } from "@/components/SiteBaslik";
 import { denemeModundaMi } from "@/lib/odeme";
 import "./globals.css";
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteBaslik denemeModu={denemeModundaMi()} />
         <main className="flex-1">{children}</main>
         <SiteAlt />
+        <Olcum />
       </body>
     </html>
   );

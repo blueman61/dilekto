@@ -90,6 +90,17 @@ export const MEVZUAT: Record<string, MevzuatKaydi> = {
       "(1) Malın ayıplı olduğunun anlaşılması durumunda tüketici; a) Satılanı geri vermeye hazır olduğunu bildirerek sözleşmeden dönme, b) Satılanı alıkoyup ayıp oranında satış bedelinden indirim isteme, c) Aşırı bir masraf gerektirmediği takdirde, bütün masrafları satıcıya ait olmak üzere satılanın ücretsiz onarılmasını isteme, ç) İmkân varsa, satılanın ayıpsız bir misli ile değiştirilmesini isteme, seçimlik haklarından birini kullanabilir. Satıcı, tüketicinin tercih ettiği bu talebi yerine getirmekle yükümlüdür. (4) Ücretsiz onarım veya malın ayıpsız misli ile değiştirilmesi haklarından birinin seçilmesi durumunda bu talebin satıcıya, üreticiye veya ithalatçıya yöneltilmesinden itibaren azami otuz iş günü, konut ve tatil amaçlı taşınmazlarda ise altmış iş günü içinde yerine getirilmesi zorunludur. Ancak, bu Kanunun 58 inci maddesi uyarınca çıkarılan yönetmelik eki listede yer alan mallara ilişkin, tüketicinin ücretsiz onarım talebi, yönetmelikte belirlenen azami tamir süresi içinde yerine getirilir. Aksi hâlde tüketici diğer seçimlik haklarını kullanmakta serbesttir. (5) Tüketicinin sözleşmeden dönme veya ayıp oranında bedelden indirim hakkını seçtiği durumlarda, ödemiş olduğu bedelin tümü veya bedelden yapılan indirim tutarı derhâl tüketiciye iade edilir.",
     dogrulama: DOGRULAMA_6502,
   },
+  "6502-m12": {
+    id: "6502-m12",
+    kanun: KANUN_6502,
+    kisaAd: "6502 sayılı Kanun",
+    madde: "12",
+    baslik: "Zamanaşımı (mal)",
+    ozet: "Ayıplı maldan sorumluluk, teslimden itibaren 2 yıldır; ayıp hile ile gizlendiyse bu süre uygulanmaz.",
+    metin:
+      "(1) Kanunlarda veya taraflar arasındaki sözleşmede daha uzun bir süre belirlenmediği takdirde, ayıplı maldan sorumluluk, ayıp daha sonra ortaya çıkmış olsa bile, malın tüketiciye teslim tarihinden itibaren iki yıllık zamanaşımına tabidir. Bu süre konut veya tatil amaçlı taşınmaz mallarda taşınmazın teslim tarihinden itibaren beş yıldır. (2) Bu Kanunun 10 uncu maddesinin üçüncü fıkrası saklı olmak üzere ikinci el satışlarda satıcının ayıplı maldan sorumluluğu bir yıldan, konut veya tatil amaçlı taşınmaz mallarda ise üç yıldan az olamaz. (3) Ayıp, ağır kusur ya da hile ile gizlenmişse zamanaşımı hükümleri uygulanmaz.",
+    dogrulama: DOGRULAMA_6502,
+  },
   "6502-m13": {
     id: "6502-m13",
     kanun: KANUN_6502,
@@ -121,6 +132,17 @@ export const MEVZUAT: Record<string, MevzuatKaydi> = {
     ozet: "Ayıplı hizmette yeniden yapılma, onarım, indirim veya bedel iadesi istenebilir.",
     metin:
       "(1) Hizmetin ayıplı ifa edildiği durumlarda tüketici, hizmetin yeniden görülmesi, hizmet sonucu ortaya çıkan eserin ücretsiz onarımı, ayıp oranında bedelden indirim veya sözleşmeden dönme haklarından birini sağlayıcıya karşı kullanmakta serbesttir. Sağlayıcı, tüketicinin tercih ettiği bu talebi yerine getirmekle yükümlüdür. Seçimlik hakların kullanılması nedeniyle ortaya çıkan tüm masraflar sağlayıcı tarafından karşılanır. Tüketici, bu seçimlik haklarından biri ile birlikte Türk Borçlar Kanunu hükümleri uyarınca tazminat da talep edebilir. (3) Tüketicinin sözleşmeden dönme veya ayıp oranında bedelden indirim hakkını seçtiği durumlarda, ödemiş olduğu bedelin tümü veya bedelden indirim yapılan tutar derhâl tüketiciye iade edilir. (4) Ücretsiz onarım veya hizmetin yeniden görülmesinin seçildiği hâllerde, hizmetin niteliği ve tüketicinin bu hizmetten yararlanma amacı dikkate alındığında, makul sayılabilecek bir süre içinde ve tüketici için ciddi sorunlar doğurmayacak şekilde bu talep sağlayıcı tarafından yerine getirilir. Her hâlükârda bu süre talebin sağlayıcıya yöneltilmesinden itibaren otuz iş gününü geçemez. Aksi takdirde tüketici diğer seçimlik haklarını kullanmakta serbesttir.",
+    dogrulama: DOGRULAMA_6502,
+  },
+  "6502-m16": {
+    id: "6502-m16",
+    kanun: KANUN_6502,
+    kisaAd: "6502 sayılı Kanun",
+    madde: "16",
+    baslik: "Zamanaşımı (hizmet)",
+    ozet: "Ayıplı hizmetten sorumluluk, hizmetin yapıldığı tarihten itibaren 2 yıldır.",
+    metin:
+      "(1) Kanunlarda veya taraflar arasındaki sözleşmede daha uzun bir süre belirlenmediği takdirde, ayıplı hizmetten sorumluluk, ayıp daha sonra ortaya çıkmış olsa bile, hizmetin ifası tarihinden itibaren iki yıllık zamanaşımına tabidir. (2) Ayıp, ağır kusur ya da hile ile gizlenmişse zamanaşımı hükümleri uygulanmaz.",
     dogrulama: DOGRULAMA_6502,
   },
   "6502-m48-3": {

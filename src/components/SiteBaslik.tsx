@@ -20,6 +20,9 @@ export function SiteBaslik({ denemeModu }: { denemeModu: boolean }) {
           <Link href="/fiyat" className="hidden text-gri hover:text-murekkep md:inline">
             Fiyat
           </Link>
+          <Link href="/dilekce-ornekleri" className="hidden text-gri hover:text-murekkep lg:inline">
+            Dilekçe örnekleri
+          </Link>
           <Link href="/sss" className="hidden text-gri hover:text-murekkep md:inline">
             Sık sorulanlar
           </Link>

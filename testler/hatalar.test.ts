@@ -77,3 +77,16 @@ describe("fatura okuma", () => {
     expect(bilgi.tarih).toBe("");
   });
 });
+
+describe("ölçüm gizliliği", async () => {
+  const { adresiTemizle } = await import("@/components/Olcum");
+  it("dilekçe kimliğini ve gereksiz parametreleri siler", () => {
+    expect(adresiTemizle("https://dilekto.com/dilekce/123e4567-e89b-12d3-a456-426614174000?x=1")).toBe(
+      "https://dilekto.com/dilekce/[id]",
+    );
+    expect(adresiTemizle("https://dilekto.com/odeme/abc")).toBe("https://dilekto.com/odeme/[id]");
+    expect(adresiTemizle("https://dilekto.com/olustur/hakem-heyeti?konu=cayma&utm_source=ig&ad=Ali")).toBe(
+      "https://dilekto.com/olustur/hakem-heyeti?konu=cayma&utm_source=ig",
+    );
+  });
+});

@@ -15,6 +15,9 @@ export function SiteAlt() {
           <Link href="/olustur/hakem-heyeti" className="text-gri hover:text-murekkep">
             Hakem heyeti dilekçesi
           </Link>
+          <Link href="/dilekce-ornekleri" className="text-gri hover:text-murekkep">
+            Dilekçe örnekleri
+          </Link>
           <Link href="/nasil-calisir" className="text-gri hover:text-murekkep">
             Nasıl çalışır
           </Link>

@@ -84,6 +84,17 @@ async function kontrolleriCalistir(): Promise<Sonuc[]> {
   return sonuclar;
 }
 
+type Istatistik = { gun: number; olusturulan: number; odenen: number };
+
+async function istatistikleriGetir(): Promise<Istatistik[] | string> {
+  try {
+    const d = depo();
+    return await Promise.all([1, 7, 30].map(async (gun) => ({ gun, ...(await d.istatistik(gun)) })));
+  } catch (e) {
+    return (e as Error).message;
+  }
+}
+
 export default async function DurumSayfasi(props: PageProps<"/durum">) {
   const { anahtar } = await props.searchParams;
   const sir = ayar("CRON_SECRET");
@@ -110,7 +121,7 @@ export default async function DurumSayfasi(props: PageProps<"/durum">) {
     "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
   ].map((a) => `${a}: ${ayar(a) ? "girilmiş" : "boş"}`);
 
-  const sonuclar = await kontrolleriCalistir();
+  const [sonuclar, istatistikler] = await Promise.all([kontrolleriCalistir(), istatistikleriGetir()]);
 
   return (
     <div className="kapsayici max-w-3xl py-10">
@@ -132,6 +143,40 @@ export default async function DurumSayfasi(props: PageProps<"/durum">) {
           </div>
         ))}
       </div>
+      <div className="kart mt-6">
+        <p className="font-semibold">Dilekçe sayıları</p>
+        {typeof istatistikler === "string" ? (
+          <p className="mt-2 text-sm text-hata">{istatistikler}</p>
+        ) : (
+          <table className="mt-3 w-full text-left text-sm">
+            <thead>
+              <tr className="text-gri">
+                <th className="py-1 font-normal">Dönem</th>
+                <th className="py-1 font-normal">Önizleme</th>
+                <th className="py-1 font-normal">Ödenen</th>
+                <th className="py-1 font-normal">Dönüşüm</th>
+              </tr>
+            </thead>
+            <tbody>
+              {istatistikler.map((i) => (
+                <tr key={i.gun} className="border-t border-cizgi">
+                  <td className="py-2">{i.gun === 1 ? "Son 24 saat" : `Son ${i.gun} gün`}</td>
+                  <td className="py-2">{i.olusturulan}</td>
+                  <td className="py-2">{i.odenen}</td>
+                  <td className="py-2">
+                    {i.olusturulan ? `%${Math.round((i.odenen / i.olusturulan) * 100)}` : "-"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        <p className="mt-2 text-xs text-gri">
+          Kayıtlar 30 gün sonra silindiği için en uzun dönem 30 gündür. Deneme ödemeleri de &quot;ödenen&quot; sayılır.
+          Ziyaretçi sayıları için Vercel &gt; Analytics sekmesine bakın.
+        </p>
+      </div>
+
       <div className="kart mt-6 text-sm">
         <p className="font-semibold">Ayarlar (değerler gösterilmez)</p>
         <ul className="mt-2 space-y-1 text-gri">

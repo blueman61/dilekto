@@ -5,11 +5,11 @@ import { hakemHeyeti } from "@/lib/dilekce-turleri/hakem-heyeti";
 import { HAKEM_HEYETI_SINIRI } from "@/lib/mevzuat";
 
 export const SORUNLAR = [
-  { baslik: "Bozuk çıkan ürün", metin: "Telefon, beyaz eşya, ayakkabı ya da başka bir ürün kısa sürede bozuldu." },
-  { baslik: "Kargodan hasarlı gelen ürün", metin: "Paket ezik, ürün kırık ya da eksik çıktı." },
-  { baslik: "Kötü yapılan hizmet", metin: "Tamir, tadilat, montaj ya da abonelik söylendiği gibi yapılmadı." },
-  { baslik: "Gelmeyen sipariş", metin: "Parasını ödediğiniz sipariş gelmedi ya da çok gecikti." },
-  { baslik: "Kabul edilmeyen iade", metin: "İnternetten aldığınız ürünü 14 gün içinde iade etmek istediniz ama kabul edilmedi." },
+  { rehber: "ayipli-mal-iade-dilekcesi", baslik: "Bozuk çıkan ürün", metin: "Telefon, beyaz eşya, ayakkabı ya da başka bir ürün kısa sürede bozuldu." },
+  { rehber: "kargo-hasari-dilekcesi", baslik: "Kargodan hasarlı gelen ürün", metin: "Paket ezik, ürün kırık ya da eksik çıktı." },
+  { rehber: "servis-tamir-sikayet-dilekcesi", baslik: "Kötü yapılan hizmet", metin: "Tamir, tadilat, montaj ya da abonelik söylendiği gibi yapılmadı." },
+  { rehber: "gelmeyen-siparis-sikayet-dilekcesi", baslik: "Gelmeyen sipariş", metin: "Parasını ödediğiniz sipariş gelmedi ya da çok gecikti." },
+  { rehber: "internetten-alinan-urun-iade-dilekcesi", baslik: "Kabul edilmeyen iade", metin: "İnternetten aldığınız ürünü 14 gün içinde iade etmek istediniz ama kabul edilmedi." },
 ];
 
 export const ADIMLAR = [

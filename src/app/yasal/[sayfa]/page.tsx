@@ -92,6 +92,10 @@ const SAYFALAR: Record<string, { baslik: string; icerik: () => ReactNode }> = {
             gönderilir. Dilekçeye eklediğiniz adınız ve kimlik bilgileriniz gönderilmez.
           </li>
           <li>Robot koruması: Cloudflare Inc. (Turnstile), yalnızca tarayıcı ve bağlantı bilgileri.</li>
+          <li>
+            Ziyaretçi istatistiği: Vercel Web Analytics. Çerez kullanmaz ve sizi tanımlamaz; dilekçe sayfalarının
+            adresindeki size özel kimlik istatistiğe gönderilmeden silinir.
+          </li>
           <li>Ödeme: gerçek ödemeye geçildiğinde ödeme kuruluşu (bu bölüm o zaman güncellenecektir).</li>
         </ul>
         <p>

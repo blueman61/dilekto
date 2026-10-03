@@ -146,6 +146,17 @@ Yapay zekâ isteklerini otomatik araçların (robotların) sömürmesini engelle
 
 ---
 
+## Ziyaretçi istatistiği (Vercel Analytics)
+
+Siteye kaç kişinin geldiğini ve hangi sayfalara baktığını görmek için:
+
+1. Vercel'de projene gir → üstteki **Analytics** sekmesine tıkla → **Enable** de.
+2. Birkaç dakika sonra ziyaretçi sayıları ve en çok bakılan sayfalar burada görünmeye başlar.
+
+Ücretsiz planda aylık ölçüm sınırı vardır; deneme dönemi için yeterlidir. Kaç önizleme hazırlandığını ve kaçının ödemeye dönüştüğünü ise durum sayfasındaki **"Dilekçe sayıları"** tablosunda görürsün.
+
+---
+
 ## Bir ayarı sonradan değiştirmek
 
 1. Vercel'de projene gir → **Settings** → **Environment Variables**.
