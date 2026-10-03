@@ -11,7 +11,7 @@ import { SORUMLULUK_METNI } from "@/components/Sorumluluk";
 import { hakemHeyeti } from "@/lib/dilekce-turleri/hakem-heyeti";
 
 const S = site.satici;
-const GUNCELLEME = "3 Ekim 2026";
+const GUNCELLEME = "4 Ekim 2026";
 
 function SaticiBilgileri() {
   return (
@@ -53,7 +53,7 @@ const SAYFALAR: Record<string, { baslik: string; icerik: () => ReactNode }> = {
             Faturada yer alan adınız ve adresiniz okunmaz ve kaydedilmez.
           </li>
           <li>
-            <strong>Ödeme bilgisi:</strong> ödeme sağlayıcısının verdiği işlem numarası ve ödeme tarihi. Kart
+            <strong>Ödeme bilgisi:</strong> ödeme sağlayıcısının (Shopier) verdiği işlem numarası ve ödeme tarihi. Kart
             bilgileriniz bize ulaşmaz.
           </li>
           <li>
@@ -96,7 +96,11 @@ const SAYFALAR: Record<string, { baslik: string; icerik: () => ReactNode }> = {
             Ziyaretçi istatistiği: Vercel Web Analytics. Çerez kullanmaz ve sizi tanımlamaz; dilekçe sayfalarının
             adresindeki size özel kimlik istatistiğe gönderilmeden silinir.
           </li>
-          <li>Ödeme: gerçek ödemeye geçildiğinde ödeme kuruluşu (bu bölüm o zaman güncellenecektir).</li>
+          <li>
+            Ödeme: Shopier. Ödeme sayfasında yazdığınız ad, soyad, e-posta, telefon ve adres bilgileri fatura ve
+            ödeme işlemi için tarayıcınızdan doğrudan Shopier&apos;e iletilir; bizim sunucularımızda saklanmaz. Kart
+            bilgilerinizi yalnızca Shopier&apos;in ödeme sayfasında girersiniz.
+          </li>
         </ul>
         <p>
           Bu sağlayıcıların bir kısmı yurt dışındadır. Yurt dışına aktarım, KVKK&apos;nın 9. maddesinde öngörülen

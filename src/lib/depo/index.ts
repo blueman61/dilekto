@@ -34,6 +34,8 @@ export interface Depo {
   sil(id: string): Promise<void>;
   /** Son "gun" günde oluşturulan ve ödenen dilekçe sayıları */
   istatistik(gun: number): Promise<{ olusturulan: number; odenen: number }>;
+  /** Son ödemeler (ödeme sağlayıcısının paneliyle karşılaştırmak için) */
+  sonOdemeler(adet: number): Promise<Pick<DilekceKaydi, "id" | "fiyat" | "odeme">[]>;
   bugunOlusturulan(): Promise<number>;
   suresiDolanlariSil(): Promise<number>;
 }
@@ -141,6 +143,18 @@ class SupabaseDepo implements Depo {
     if (error) throw vtHatasi(error, "Silme", status);
   }
 
+  async sonOdemeler(adet: number) {
+    const { data, error, status } = await this.db
+      .from("dilekceler")
+      .select("id, fiyat, odeme")
+      .eq("durum", "odendi")
+      .neq("tur", "durum-testi")
+      .order("olusturma", { ascending: false })
+      .limit(adet);
+    if (error) throw vtHatasi(error, "Son ödemeler", status);
+    return (data ?? []) as Pick<DilekceKaydi, "id" | "fiyat" | "odeme">[];
+  }
+
   async istatistik(gun: number) {
     const baslangic = new Date(Date.now() - gun * 86_400_000).toISOString();
     const say = async (yalnizOdenen: boolean) => {
@@ -209,6 +223,14 @@ class BellekDepo implements Depo {
 
   async sil(id: string) {
     this.kayitlar.delete(id);
+  }
+
+  async sonOdemeler(adet: number) {
+    return [...this.kayitlar.values()]
+      .filter((k) => k.durum === "odendi")
+      .sort((a, b) => b.olusturma.localeCompare(a.olusturma))
+      .slice(0, adet)
+      .map(({ id, fiyat, odeme }) => ({ id, fiyat, odeme }));
   }
 
   async istatistik(gun: number) {

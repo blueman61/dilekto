@@ -17,6 +17,31 @@ export const ILLER = [
   "Trabzon", "Tunceli", "Uşak", "Van", "Yalova", "Yozgat", "Zonguldak",
 ];
 
+/** Plaka sırasına göre iller (posta kodunun ilk iki hanesi plaka koduyla aynıdır) */
+export const PLAKA_SIRASI = [
+  "Adana", "Adıyaman", "Afyonkarahisar", "Ağrı", "Amasya", "Ankara", "Antalya", "Artvin",
+  "Aydın", "Balıkesir", "Bilecik", "Bingöl", "Bitlis", "Bolu", "Burdur", "Bursa", "Çanakkale",
+  "Çankırı", "Çorum", "Denizli", "Diyarbakır", "Edirne", "Elazığ", "Erzincan", "Erzurum",
+  "Eskişehir", "Gaziantep", "Giresun", "Gümüşhane", "Hakkari", "Hatay", "Isparta", "Mersin",
+  "İstanbul", "İzmir", "Kars", "Kastamonu", "Kayseri", "Kırklareli", "Kırşehir", "Kocaeli",
+  "Konya", "Kütahya", "Malatya", "Manisa", "Kahramanmaraş", "Mardin", "Muğla", "Muş",
+  "Nevşehir", "Niğde", "Ordu", "Rize", "Sakarya", "Samsun", "Siirt", "Sinop", "Sivas",
+  "Tekirdağ", "Tokat", "Trabzon", "Tunceli", "Şanlıurfa", "Uşak", "Van", "Yozgat", "Zonguldak",
+  "Aksaray", "Bayburt", "Karaman", "Kırıkkale", "Batman", "Şırnak", "Bartın", "Ardahan",
+  "Iğdır", "Yalova", "Karabük", "Kilis", "Osmaniye", "Düzce",
+];
+
+/** Posta kodu bilinmiyorsa il merkezinin genel posta kodu (ör. İstanbul → 34000) */
+export function ilPostaKodu(il: string): string {
+  const sira = PLAKA_SIRASI.indexOf(il);
+  return sira >= 0 ? `${String(sira + 1).padStart(2, "0")}000` : "00000";
+}
+
+/** "0 (555) 123 45 67" / "+90 555..." → "5551234567" */
+export function telefonSadelestir(telefon: string): string {
+  return telefon.replace(/\D/g, "").replace(/^90(?=5\d{9}$)/, "").replace(/^0(?=\d{10}$)/, "");
+}
+
 export function buyukHarf(metin: string): string {
   return metin.toLocaleUpperCase("tr-TR");
 }

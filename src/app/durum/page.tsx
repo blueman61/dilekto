@@ -7,7 +7,7 @@ import { taslakUret } from "@/lib/ai";
 import { depo } from "@/lib/depo";
 import { hakemHeyeti } from "@/lib/dilekce-turleri/hakem-heyeti";
 import { DilektoHatasi, type HataKodu } from "@/lib/hatalar";
-import { odemeModu } from "@/lib/odeme";
+import { odemeModu, odemeSaglayicisi } from "@/lib/odeme";
 import { robotKorumasiAcik } from "@/lib/robot";
 
 export const dynamic = "force-dynamic";
@@ -24,6 +24,8 @@ const COZUMLER: Partial<Record<HataKodu, string>> = {
   "YZ-BOLGE":
     "Gemini, sitenin çalıştığı sunucu bölgesinden kullanılamıyor. Vercel > Settings > Functions > Function Region bölümünde Washington, D.C., USA (iad1) seçip yeniden yayınlayın.",
   "YZ-DENETIM": "Yapay zekâ kurallara uygun metin üretemedi. Tekrar deneyin; sürerse bana yazın.",
+  "ODEME-AYAR":
+    "Ödeme modu Shopier ama anahtarlar girilmemiş. Vercel'de SHOPIER_API_KEY ve SHOPIER_API_SECRET ayarlarını ekleyin ya da ODEME_MODU'nu deneme yapın; sonra yeniden yayınlayın.",
   "VT-AYAR": "Vercel'de SUPABASE_URL ve SUPABASE_SECRET_KEY ayarlarını ekleyip yeniden yayınlayın.",
   "VT-ANAHTAR": "Supabase, Vercel'deki SUPABASE_SECRET_KEY anahtarını kabul etmedi. Supabase > Project Settings > API Keys bölümünde \"Secret keys\" altındaki anahtarın (sb_secret_ ile başlar) yanındaki kopyala düğmesine basın; Vercel'deki SUPABASE_SECRET_KEY değerini silip bunu yapıştırın. SUPABASE_URL ile anahtarın aynı projeden olduğundan emin olun. Sonra yeniden yayınlayın.",
   "VT-TABLO": "Tablo oluşturulmamış. Supabase > SQL Editor'da supabase/kurulum.sql dosyasının içeriğini çalıştırın.",
@@ -81,7 +83,22 @@ async function kontrolleriCalistir(): Promise<Sonuc[]> {
     }),
   );
 
+  sonuclar.push(
+    await dene("Ödeme ayarları", async () => {
+      const s = odemeSaglayicisi();
+      s.ayarlariDenetle?.();
+      return s.gercek ? `Gerçek ödeme açık (${s.ad}).` : "Deneme modu: kartlardan para çekilmez.";
+    }),
+  );
   return sonuclar;
+}
+
+async function sonOdemeleriGetir() {
+  try {
+    return await depo().sonOdemeler(20);
+  } catch {
+    return [];
+  }
 }
 
 type Istatistik = { gun: number; olusturulan: number; odenen: number };
@@ -117,11 +134,18 @@ export default async function DurumSayfasi(props: PageProps<"/durum">) {
     "SUPABASE_SECRET_KEY",
     "CRON_SECRET",
     "ODEME_MODU",
+    "SHOPIER_API_KEY",
+    "SHOPIER_API_SECRET",
+    "SHOPIER_SITE_NO",
     "TURNSTILE_SECRET_KEY",
     "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
   ].map((a) => `${a}: ${ayar(a) ? "girilmiş" : "boş"}`);
 
-  const [sonuclar, istatistikler] = await Promise.all([kontrolleriCalistir(), istatistikleriGetir()]);
+  const [sonuclar, istatistikler, sonOdemeler] = await Promise.all([
+    kontrolleriCalistir(),
+    istatistikleriGetir(),
+    sonOdemeleriGetir(),
+  ]);
 
   return (
     <div className="kapsayici max-w-3xl py-10">
@@ -175,6 +199,38 @@ export default async function DurumSayfasi(props: PageProps<"/durum">) {
           Kayıtlar 30 gün sonra silindiği için en uzun dönem 30 gündür. Deneme ödemeleri de &quot;ödenen&quot; sayılır.
           Ziyaretçi sayıları için Vercel &gt; Analytics sekmesine bakın.
         </p>
+      </div>
+
+      <div className="kart mt-6">
+        <p className="font-semibold">Son ödemeler</p>
+        <p className="mt-1 text-xs text-gri">
+          Gerçek ödemeleri Shopier panelindeki siparişlerle karşılaştırın: her satırdaki ödeme numarası Shopier&apos;de
+          de görünmelidir. Shopier&apos;de karşılığı olmayan bir satır görürseniz bana bildirin.
+        </p>
+        {sonOdemeler.length === 0 ? (
+          <p className="mt-2 text-sm text-gri">Henüz ödeme yok.</p>
+        ) : (
+          <table className="mt-3 w-full text-left text-sm">
+            <thead>
+              <tr className="text-gri">
+                <th className="py-1 font-normal">Tarih</th>
+                <th className="py-1 font-normal">Sağlayıcı</th>
+                <th className="py-1 font-normal">Ödeme no</th>
+                <th className="py-1 font-normal">Tutar</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sonOdemeler.map((o) => (
+                <tr key={o.id} className="border-t border-cizgi">
+                  <td className="py-2">{o.odeme ? new Date(o.odeme.tarih).toLocaleString("tr-TR") : "-"}</td>
+                  <td className="py-2">{o.odeme?.saglayici ?? "-"}</td>
+                  <td className="py-2 break-all">{o.odeme?.referans ?? "-"}</td>
+                  <td className="py-2">{o.fiyat} TL</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       <div className="kart mt-6 text-sm">

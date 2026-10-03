@@ -3,7 +3,6 @@ import Link from "next/link";
 import { tlYaz } from "@/config/site";
 import { AtifListesi } from "@/components/AtifListesi";
 import { DuzenleyiciIstemci as Duzenleyici } from "@/components/Istemci";
-import { OdemeyeGec } from "@/components/OdemeyeGec";
 import { SorumlulukNotu } from "@/components/Sorumluluk";
 import { UygunlukKutusu } from "@/components/UygunlukKutusu";
 import { depo } from "@/lib/depo";
@@ -112,10 +111,9 @@ export default async function DilekceSayfasi(props: PageProps<"/dilekce/[id]">) 
           {tlYaz(kayit.fiyat)} <span className="text-base font-normal text-gri">tek seferlik, KDV dahil</span>
         </p>
         <div className="mt-5">
-          <OdemeyeGec
-            id={kayit.id}
-            etiket={denemeModundaMi() ? "Devam et (deneme ödemesi)" : `${tlYaz(kayit.fiyat)} öde ve dilekçemi aç`}
-          />
+          <Link href={`/odeme/${kayit.id}`} className="dugme w-full text-lg">
+            {denemeModundaMi() ? "Devam et (deneme ödemesi)" : `${tlYaz(kayit.fiyat)} öde ve dilekçemi aç`}
+          </Link>
         </div>
         <p className="mt-3 text-sm text-gri">
           Bu sayfanın adresini kaydederseniz {silinme} tarihine kadar dilekçenize buradan ulaşabilirsiniz.

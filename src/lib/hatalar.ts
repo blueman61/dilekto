@@ -16,6 +16,7 @@ export type HataKodu =
   | "VT-TABLO" // tablo oluşturulmamış
   | "VT-BAGLANTI" // Supabase'e ulaşılamadı (adres yanlış olabilir)
   | "VT-HATA" // diğer veritabanı hataları
+  | "ODEME-AYAR" // ödeme sağlayıcısının anahtarları girilmemiş
   | "GENEL"; // beklenmeyen hata
 
 export class DilektoHatasi extends Error {
@@ -34,6 +35,7 @@ const GECICI: HataKodu[] = ["YZ-KOTA", "YZ-BAGLANTI", "YZ-DENETIM", "VT-BAGLANTI
 /** Ziyaretçiye gösterilecek sade mesaj */
 export function kullaniciMesaji(kod: HataKodu): string {
   if (kod === "YZ-KOTA") return "Şu an çok yoğunuz. Lütfen birkaç dakika sonra tekrar deneyin.";
+  if (kod === "ODEME-AYAR") return "Ödeme şu an başlatılamıyor. Lütfen daha sonra tekrar deneyin.";
   if (kod === "BELGE-OKUNAMADI")
     return "Belgeniz okunamadı. Daha net bir fotoğraf yükleyebilir ya da bilgileri kendiniz yazabilirsiniz.";
   if (GECICI.includes(kod)) return "Dilekçeniz şu an hazırlanamadı. Lütfen birkaç dakika sonra tekrar deneyin.";

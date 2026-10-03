@@ -193,5 +193,5 @@ Bunları şimdi yapmana gerek yok; yalnızca bilgi için:
 - **Yapay zekâ:** Gemini için Google AI Studio'da faturalandırmayı açacağız (ücretli katman) ya da Claude'a geçeceğiz. Ücretli katmanda gönderilen metinler model eğitiminde kullanılmaz.
 - **Şirket bilgileri:** `src/config/site.ts` dosyasındaki satıcı bilgilerini (unvan, adres, vergi dairesi ve numarası, telefon) dolduracağız. Bunları bana iletmen yeterli.
 - **Yasal metinler:** KVKK aydınlatma metni, kullanım şartları, mesafeli satış sözleşmesi ve iade koşulları taslaktır. Yayından önce bir uzmana okutmalısın.
-- **Ödeme:** iyzico veya PayTR başvurusu ve bağlantısı için `docs/ODEME.md` dosyasına bak.
+- **Ödeme:** Shopier bağlantısı hazır; açma adımları `docs/ODEME.md` dosyasında.
 - **Fatura:** Her satış için e-Arşiv fatura kesilmesi gerekir; muhasebecinle konuş.

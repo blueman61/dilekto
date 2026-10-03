@@ -3,7 +3,7 @@
 Tüketicilerin kendi dilekçelerini kolayca hazırlamasını sağlayan web uygulaması. İlk ürün: **Tüketici Hakem Heyeti başvuru dilekçesi**.
 
 - Kurulum ve yayına alma: [docs/KURULUM.md](docs/KURULUM.md)
-- Gerçek ödemeye geçiş: [docs/ODEME.md](docs/ODEME.md)
+- Ödeme (deneme modu ve Shopier): [docs/ODEME.md](docs/ODEME.md)
 - Pazarlama planı (ilk 100 müşteri): [docs/PAZARLAMA-PLANI.md](docs/PAZARLAMA-PLANI.md)
 
 ## Nasıl çalışır?
@@ -28,7 +28,7 @@ Tüketicilerin kendi dilekçelerini kolayca hazırlamasını sağlayan web uygul
 | `src/lib/yasakli-ifadeler.ts` | Sitede ve yapay zekâ çıktısında yasak ifadeler |
 | `src/lib/ai/` | Yapay zekâ sağlayıcıları ve çıktı denetimi |
 | `src/lib/depo/` | Supabase (canlı) / bellek (yerel geliştirme) kayıt deposu |
-| `src/lib/odeme/` | Ödeme sağlayıcıları (şu an: deneme) |
+| `src/lib/odeme/` | Ödeme sağlayıcıları: deneme ve Shopier (`ODEME_MODU` ile seçilir) |
 | `src/lib/hatalar.ts` | Hata kodları ve kullanıcı mesajları |
 | `src/lib/robot.ts` | Robot koruması (Cloudflare Turnstile, isteğe bağlı) |
 | `src/content/genel.ts` | Tanıtım sayfalarının ortak metinleri (adımlar, SSS) |
