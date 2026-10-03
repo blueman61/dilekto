@@ -1,6 +1,8 @@
 // Sitenin genel ayarları. Gizli bilgi içermez; gizli anahtarlar yalnızca
 // ortam değişkenlerinde (Vercel > Settings > Environment Variables) durur.
 
+import { ayar } from "@/lib/ayar";
+
 export const site = {
   ad: "Dilekto",
   slogan: "Dilekçenizi kendiniz, kolayca hazırlayın",
@@ -18,14 +20,13 @@ export const site = {
 
   // Belgelerin saklanma süreleri
   dilekceSaklamaGun: 30,
-  faturaSaklamaSaat: 24,
 } as const;
 
 /** Sitenin tam adresi. Alan adı bağlanınca SITE_ADRESI ayarlanır. */
 export function siteAdresi(): string {
-  const acik = process.env.SITE_ADRESI;
+  const acik = ayar("SITE_ADRESI");
   if (acik) return acik.replace(/\/$/, "");
-  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  const vercel = ayar("VERCEL_PROJECT_PRODUCTION_URL");
   if (vercel) return `https://${vercel}`;
   return "http://localhost:3000";
 }
@@ -35,7 +36,7 @@ export function siteAdresi(): string {
  * Açmak için Vercel'de SITE_ARAMA_MOTORLARINA_ACIK=evet yapılır.
  */
 export function aramaMotorlarinaAcik(): boolean {
-  return process.env.SITE_ARAMA_MOTORLARINA_ACIK === "evet";
+  return ayar("SITE_ARAMA_MOTORLARINA_ACIK") === "evet";
 }
 
 /** TL tutarını "149 TL" biçiminde yazar. */

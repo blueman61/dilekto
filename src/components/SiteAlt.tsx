@@ -15,13 +15,13 @@ export function SiteAlt() {
           <Link href="/olustur/hakem-heyeti" className="text-gri hover:text-murekkep">
             Hakem heyeti dilekçesi
           </Link>
-          <Link href="/#nasil-calisir" className="text-gri hover:text-murekkep">
+          <Link href="/nasil-calisir" className="text-gri hover:text-murekkep">
             Nasıl çalışır
           </Link>
-          <Link href="/#fiyat" className="text-gri hover:text-murekkep">
+          <Link href="/fiyat" className="text-gri hover:text-murekkep">
             Fiyat
           </Link>
-          <Link href="/#sss" className="text-gri hover:text-murekkep">
+          <Link href="/sss" className="text-gri hover:text-murekkep">
             Sık sorulan sorular
           </Link>
           <Link href="/iletisim" className="text-gri hover:text-murekkep">

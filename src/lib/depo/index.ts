@@ -5,8 +5,10 @@
 // Kişisel bilgiler (ad, TC, adres, telefon) ASLA burada saklanmaz; onlar
 // yalnızca kullanıcının tarayıcısında dilekçeye eklenir.
 
+import { ayar } from "@/lib/ayar";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { site } from "@/config/site";
+import { DilektoHatasi } from "@/lib/hatalar";
 import type { Cevaplar, TaslakCiktisi } from "@/lib/dilekce-turleri/tipler";
 
 export type DilekceKaydi = {
@@ -29,6 +31,7 @@ export interface Depo {
   olustur(k: YeniKayit): Promise<DilekceKaydi>;
   getir(id: string): Promise<DilekceKaydi | null>;
   odemeIsle(id: string, odeme: NonNullable<DilekceKaydi["odeme"]>): Promise<void>;
+  sil(id: string): Promise<void>;
   bugunOlusturulan(): Promise<number>;
   suresiDolanlariSil(): Promise<number>;
 }
@@ -61,6 +64,23 @@ type Satir = {
   silinecek: string;
 };
 
+type SupabaseHatasi = { message: string; code?: string; details?: string; hint?: string };
+
+/** Supabase hatasını, nedeni anlaşılır bir hata koduna çevirir. */
+export function vtHatasi(error: SupabaseHatasi, islem: string): DilektoHatasi {
+  const m = `${error.message} ${error.details ?? ""} ${error.hint ?? ""}`;
+  if (error.code === "42501" || /row-level security|permission denied|invalid api key|jwt|unauthorized/i.test(m)) {
+    return new DilektoHatasi("VT-ANAHTAR", `${islem}: Supabase anahtarı yetkisiz (secret key girilmeli).`, error);
+  }
+  if (error.code === "PGRST205" || error.code === "42P01" || /does not exist|could not find the table/i.test(m)) {
+    return new DilektoHatasi("VT-TABLO", `${islem}: dilekceler tablosu bulunamadı (kurulum.sql çalıştırılmalı).`, error);
+  }
+  if (/fetch failed|enotfound|econnrefused|network/i.test(m)) {
+    return new DilektoHatasi("VT-BAGLANTI", `${islem}: Supabase'e ulaşılamadı (SUPABASE_URL kontrol edilmeli).`, error);
+  }
+  return new DilektoHatasi("VT-HATA", `${islem}: ${error.message}`, error);
+}
+
 class SupabaseDepo implements Depo {
   constructor(private db: SupabaseClient) {}
 
@@ -70,7 +90,7 @@ class SupabaseDepo implements Depo {
       .insert({ ...k, durum: "onizleme", silinecek: silinmeTarihi() })
       .select()
       .single<Satir>();
-    if (error) throw new Error(`Kayıt oluşturulamadı: ${error.message}`);
+    if (error) throw vtHatasi(error, "Kayıt oluşturma");
     return data;
   }
 
@@ -82,7 +102,7 @@ class SupabaseDepo implements Depo {
       .eq("id", id)
       .gt("silinecek", new Date().toISOString())
       .maybeSingle<Satir>();
-    if (error) throw new Error(`Kayıt okunamadı: ${error.message}`);
+    if (error) throw vtHatasi(error, "Kayıt okuma");
     return data;
   }
 
@@ -92,7 +112,12 @@ class SupabaseDepo implements Depo {
       .update({ durum: "odendi", odeme })
       .eq("id", id)
       .eq("durum", "onizleme");
-    if (error) throw new Error(`Ödeme kaydedilemedi: ${error.message}`);
+    if (error) throw vtHatasi(error, "Ödeme kaydı");
+  }
+
+  async sil(id: string) {
+    const { error } = await this.db.from("dilekceler").delete().eq("id", id);
+    if (error) throw vtHatasi(error, "Silme");
   }
 
   async bugunOlusturulan() {
@@ -100,7 +125,7 @@ class SupabaseDepo implements Depo {
       .from("dilekceler")
       .select("id", { count: "exact", head: true })
       .gte("olusturma", gunBasi());
-    if (error) throw new Error(`Sayım yapılamadı: ${error.message}`);
+    if (error) throw vtHatasi(error, "Günlük sayım");
     return count ?? 0;
   }
 
@@ -110,7 +135,7 @@ class SupabaseDepo implements Depo {
       .delete()
       .lte("silinecek", new Date().toISOString())
       .select("id");
-    if (error) throw new Error(`Silme yapılamadı: ${error.message}`);
+    if (error) throw vtHatasi(error, "Silme");
     return data?.length ?? 0;
   }
 }
@@ -143,6 +168,10 @@ class BellekDepo implements Depo {
     if (k && k.durum === "onizleme") this.kayitlar.set(id, { ...k, durum: "odendi", odeme });
   }
 
+  async sil(id: string) {
+    this.kayitlar.delete(id);
+  }
+
   async bugunOlusturulan() {
     const bas = gunBasi();
     return [...this.kayitlar.values()].filter((k) => k.olusturma >= bas).length;
@@ -167,8 +196,8 @@ const kuresel = globalThis as unknown as { __dilektoDepo?: Depo };
 
 export function depo(): Depo {
   if (kuresel.__dilektoDepo) return kuresel.__dilektoDepo;
-  const url = process.env.SUPABASE_URL;
-  const anahtar = process.env.SUPABASE_SECRET_KEY;
+  const url = ayar("SUPABASE_URL");
+  const anahtar = ayar("SUPABASE_SECRET_KEY");
   if (url && anahtar) {
     kuresel.__dilektoDepo = new SupabaseDepo(
       createClient(url, anahtar, { auth: { persistSession: false, autoRefreshToken: false } }),
@@ -176,7 +205,7 @@ export function depo(): Depo {
   } else if (process.env.NODE_ENV !== "production") {
     kuresel.__dilektoDepo = new BellekDepo();
   } else {
-    throw new Error("SUPABASE_URL ve SUPABASE_SECRET_KEY ayarlanmamış (bkz. docs/KURULUM.md).");
+    throw new DilektoHatasi("VT-AYAR", "SUPABASE_URL ve SUPABASE_SECRET_KEY ayarlanmamış (bkz. docs/KURULUM.md).");
   }
   return kuresel.__dilektoDepo;
 }

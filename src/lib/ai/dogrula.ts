@@ -12,13 +12,6 @@ export const TaslakSemasi = z.object({
   ekMevzuat: z.array(z.string()),
 });
 
-/** JSON şeması (yapay zekâ sağlayıcılarına verilir) */
-export function taslakJsonSemasi(): Record<string, unknown> {
-  const sema = z.toJSONSchema(TaslakSemasi) as Record<string, unknown>;
-  delete sema.$schema;
-  return sema;
-}
-
 // Metinde kanun / madde numarası geçmesini yakalar:
 // "6502 sayılı", "madde 11", "11. madde", "m. 11", "md. 11", "11 inci maddesi"
 const MADDE_DESENLERI: RegExp[] = [

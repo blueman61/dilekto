@@ -1,54 +1,10 @@
 import Link from "next/link";
-import { site, tlYaz } from "@/config/site";
+import { tlYaz } from "@/config/site";
+import { MobilCagri } from "@/components/MobilCagri";
 import { SorumlulukNotu } from "@/components/Sorumluluk";
+import { AdimListesi, FiyatKarti, SssListesi } from "@/components/Tanitim";
+import { SORUNLAR } from "@/content/genel";
 import { hakemHeyeti } from "@/lib/dilekce-turleri/hakem-heyeti";
-import { HAKEM_HEYETI_SINIRI } from "@/lib/mevzuat";
-
-const SORUNLAR = [
-  { baslik: "Bozuk çıkan ürün", metin: "Telefon, beyaz eşya, ayakkabı ya da başka bir ürün kısa sürede bozuldu." },
-  { baslik: "Kargodan hasarlı gelen ürün", metin: "Paket ezik, ürün kırık ya da eksik çıktı." },
-  { baslik: "Kötü yapılan hizmet", metin: "Tamir, tadilat, montaj ya da abonelik söylendiği gibi yapılmadı." },
-  { baslik: "Gelmeyen sipariş", metin: "Parasını ödediğiniz sipariş gelmedi ya da çok gecikti." },
-  { baslik: "Kabul edilmeyen iade", metin: "İnternetten aldığınız ürünü 14 gün içinde iade etmek istediniz ama kabul edilmedi." },
-];
-
-const ADIMLAR = [
-  { baslik: "Ücretsiz testi yapın", metin: "6 kısa soruyla hakem heyetine başvurup başvuramayacağınızı hemen öğrenin." },
-  { baslik: "Ne olduğunu anlatın", metin: "Ne aldığınızı, ne olduğunu ve ne istediğinizi kendi cümlelerinizle yazın." },
-  { baslik: "Önizlemeyi görün", metin: "Size özel dilekçenizin ilk bölümünü ücretsiz okuyun." },
-  { baslik: "İndirin ve başvurun", metin: "Ödemeden sonra dilekçeyi düzenleyin, PDF ya da Word olarak indirin, e-Devlet'ten gönderin." },
-];
-
-const SSS = [
-  {
-    s: "Tüketici hakem heyeti nedir?",
-    c: `Tüketiciler ile satıcılar arasındaki sorunlara bakan, Ticaret Bakanlığı'na bağlı başvuru yeridir. ${HAKEM_HEYETI_SINIRI.yil} yılında değeri ${tlYaz(HAKEM_HEYETI_SINIRI.tutar)}'nin altındaki sorunlar için hakem heyetine başvurmak zorunludur.`,
-  },
-  {
-    s: "Hakem heyetine başvurmak ücretli mi?",
-    c: `Hayır, başvuru ücretsizdir. Dilekto'ya ödediğiniz ${tlYaz(hakemHeyeti.fiyat)}, dilekçenizi hazırlayan aracın ücretidir.`,
-  },
-  {
-    s: "Dilekto ne yapar, ne yapmaz?",
-    c: "Dilekto, verdiğiniz bilgilerle dilekçenizi düzenli ve resmî bir dille yazmanıza yardım eden bir araçtır. Sizin adınıza başvuru yapmaz, sizi temsil etmez ve sonuç hakkında söz vermez. Başvuruyu siz yaparsınız; nasıl yapacağınızı adım adım anlatırız.",
-  },
-  {
-    s: "Kişisel bilgilerim ne oluyor?",
-    c: `Adınız, TC kimlik numaranız, adresiniz ve telefonunuz sunucularımıza hiç gönderilmez; dilekçeye yalnızca sizin cihazınızda eklenir. Olayı anlatan bilgiler ${site.dilekceSaklamaGun} gün sonra kendiliğinden silinir.`,
-  },
-  {
-    s: "Dilekçeyi değiştirebilir miyim?",
-    c: "Evet. Ödemeden sonra dilekçenin tamamı açılır; istediğiniz yeri düzeltip PDF ya da Word olarak indirebilirsiniz.",
-  },
-  {
-    s: "Dilekçeme sonra nasıl ulaşırım?",
-    c: `Dilekçenizin size özel bir adresi vardır. Bu adresi kaydederseniz ${site.dilekceSaklamaGun} gün boyunca dilekçenize yeniden ulaşabilirsiniz.`,
-  },
-  {
-    s: "Başvuruyu nereden yapacağım?",
-    c: "En kolay yol e-Devlet'tir. Dilekçenizle birlikte e-Devlet'te hangi adımları izleyeceğinizi ve hangi belgeleri ekleyeceğinizi gösteren bir liste de hazırlarız.",
-  },
-];
 
 export default function AnaSayfa() {
   return (
@@ -124,17 +80,12 @@ export default function AnaSayfa() {
       <section id="nasil-calisir" className="scroll-mt-20 bg-zemin py-12">
         <div className="kapsayici">
           <h2 className="text-2xl font-bold">Nasıl çalışır?</h2>
-          <ol className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {ADIMLAR.map((a, i) => (
-              <li key={a.baslik} className="kart">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-marka-600 font-bold text-white">
-                  {i + 1}
-                </span>
-                <h3 className="mt-3 font-semibold">{a.baslik}</h3>
-                <p className="mt-1 text-gri">{a.metin}</p>
-              </li>
-            ))}
-          </ol>
+          <div className="mt-6">
+            <AdimListesi />
+          </div>
+          <Link href="/nasil-calisir" className="mt-6 inline-block font-semibold text-marka-700 underline">
+            Ayrıntılı anlatım
+          </Link>
         </div>
       </section>
 
@@ -142,30 +93,7 @@ export default function AnaSayfa() {
       <section id="fiyat" className="kapsayici scroll-mt-20 py-12">
         <h2 className="text-2xl font-bold">Fiyat</h2>
         <div className="mt-6 grid gap-6 md:grid-cols-2">
-          <div className="kart border-2 border-marka-600">
-            <p className="font-semibold text-marka-700">{hakemHeyeti.ad}</p>
-            <p className="mt-2 text-4xl font-bold">
-              {tlYaz(hakemHeyeti.fiyat)}
-              <span className="ml-2 text-base font-normal text-gri">tek seferlik, KDV dahil</span>
-            </p>
-            <ul className="mt-5 space-y-2">
-              {[
-                "Size özel, düzenlenebilir dilekçe",
-                "PDF ve Word olarak indirme",
-                "Eklemeniz gereken belgelerin listesi",
-                "e-Devlet'ten başvuru için adım adım anlatım",
-                `${site.dilekceSaklamaGun} gün boyunca yeniden indirme`,
-              ].map((m) => (
-                <li key={m} className="flex gap-2">
-                  <span className="text-basari" aria-hidden="true">✓</span>
-                  {m}
-                </li>
-              ))}
-            </ul>
-            <Link href="/olustur/hakem-heyeti" className="dugme mt-6 w-full">
-              Ücretsiz teste başla
-            </Link>
-          </div>
+          <FiyatKarti />
           <div className="kart bg-zemin">
             <h3 className="font-semibold">Önce ücretsiz deneyin</h3>
             <p className="mt-2 text-gri">
@@ -186,25 +114,19 @@ export default function AnaSayfa() {
       <section id="sss" className="scroll-mt-20 bg-zemin py-12">
         <div className="kapsayici max-w-3xl">
           <h2 className="text-2xl font-bold">Sık sorulan sorular</h2>
-          <div className="mt-6 space-y-3">
-            {SSS.map((x) => (
-              <details key={x.s} className="kart group p-0 sm:p-0">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 font-semibold">
-                  {x.s}
-                  <span className="text-marka-600 transition group-open:rotate-45" aria-hidden="true">
-                    +
-                  </span>
-                </summary>
-                <p className="px-5 pb-5 text-gri">{x.c}</p>
-              </details>
-            ))}
+          <div className="mt-6">
+            <SssListesi adet={5} />
           </div>
+          <Link href="/sss" className="mt-6 inline-block font-semibold text-marka-700 underline">
+            Tüm soruları gör
+          </Link>
         </div>
       </section>
 
       <section className="kapsayici max-w-3xl pt-12">
         <SorumlulukNotu />
       </section>
+      <MobilCagri />
     </>
   );
 }

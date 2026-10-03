@@ -78,6 +78,9 @@ export type DilekceTuru = {
   testSorulari: (cevaplar: Cevaplar) => Soru[];
   uygunluk: (test: Cevaplar, bugun?: Date) => UygunlukSonucu;
 
+  /** Olay anlatımından önce isteğe bağlı fatura yükleme adımı gösterilsin mi */
+  faturaYukleme: boolean;
+
   /** Olayı anlatma soruları (test cevaplarına göre değişebilir) */
   hikayeSorulari: (test: Cevaplar) => Soru[];
 

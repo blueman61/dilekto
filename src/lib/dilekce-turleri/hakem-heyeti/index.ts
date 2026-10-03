@@ -560,6 +560,7 @@ export const hakemHeyeti: DilekceTuru = {
   testBasligi: "Hakem heyetine başvurabilir miyim?",
   testSorulari,
   uygunluk,
+  faturaYukleme: true,
   hikayeSorulari,
   yapayZeka: {
     sistemTalimati: SISTEM_TALIMATI,

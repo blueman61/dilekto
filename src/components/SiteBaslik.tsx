@@ -14,13 +14,13 @@ export function SiteBaslik({ denemeModu }: { denemeModu: boolean }) {
           <Logo />
         </Link>
         <nav className="flex items-center gap-5 text-[0.95rem]">
-          <Link href="/#nasil-calisir" className="hidden text-gri hover:text-murekkep md:inline">
+          <Link href="/nasil-calisir" className="hidden text-gri hover:text-murekkep md:inline">
             Nasıl çalışır
           </Link>
-          <Link href="/#fiyat" className="hidden text-gri hover:text-murekkep md:inline">
+          <Link href="/fiyat" className="hidden text-gri hover:text-murekkep md:inline">
             Fiyat
           </Link>
-          <Link href="/#sss" className="hidden text-gri hover:text-murekkep md:inline">
+          <Link href="/sss" className="hidden text-gri hover:text-murekkep md:inline">
             Sık sorulanlar
           </Link>
           <Link href="/olustur/hakem-heyeti" className="dugme min-h-10 px-4 py-2 text-[0.95rem]">

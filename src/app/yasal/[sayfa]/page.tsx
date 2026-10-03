@@ -11,7 +11,7 @@ import { SORUMLULUK_METNI } from "@/components/Sorumluluk";
 import { hakemHeyeti } from "@/lib/dilekce-turleri/hakem-heyeti";
 
 const S = site.satici;
-const GUNCELLEME = "2 Ekim 2026";
+const GUNCELLEME = "3 Ekim 2026";
 
 function SaticiBilgileri() {
   return (
@@ -48,6 +48,11 @@ const SAYFALAR: Record<string, { baslik: string; icerik: () => ReactNode }> = {
             adı ve adresi, olayın anlatımı, talebiniz ve elinizdeki belgelerin türü.
           </li>
           <li>
+            <strong>Yüklediğiniz fatura (isteğe bağlı):</strong> yalnızca ürün, satıcı, tarih ve tutar bilgilerini okumak
+            için yapay zekâ servisine gönderilir. Dosya hiçbir yerde kaydedilmez; işlem bitince bellekten silinir.
+            Faturada yer alan adınız ve adresiniz okunmaz ve kaydedilmez.
+          </li>
+          <li>
             <strong>Ödeme bilgisi:</strong> ödeme sağlayıcısının verdiği işlem numarası ve ödeme tarihi. Kart
             bilgileriniz bize ulaşmaz.
           </li>
@@ -73,7 +78,7 @@ const SAYFALAR: Record<string, { baslik: string; icerik: () => ReactNode }> = {
             Dilekçe taslağınızı hazırlamak ve size sunmak: sözleşmenin kurulması ve ifası (KVKK m. 5/2-c).
           </li>
           <li>Ödeme ve muhasebe kayıtlarını tutmak: hukuki yükümlülük (KVKK m. 5/2-ç).</li>
-          <li>Siteyi güvenli ve çalışır tutmak: meşru menfaat (KVKK m. 5/2-f).</li>
+          <li>Siteyi güvenli ve çalışır tutmak, otomatik kötüye kullanımı (robotları) engellemek: meşru menfaat (KVKK m. 5/2-f).</li>
         </ul>
 
         <h2>4. Verileri kimlere aktarıyoruz?</h2>
@@ -82,10 +87,11 @@ const SAYFALAR: Record<string, { baslik: string; icerik: () => ReactNode }> = {
           <li>Barındırma: Vercel Inc. (ABD)</li>
           <li>Veritabanı: Supabase Inc. (sunucu konumu: Almanya, Frankfurt)</li>
           <li>
-            Metin üretimi için yapay zekâ: Google LLC (Gemini API) veya Anthropic PBC (Claude API) (ABD). Bu
-            sağlayıcılara yalnızca olayın anlatımı ve dilekçe bilgileri gönderilir; adınız ve kimlik bilgileriniz
-            gönderilmez.
+            Metin üretimi ve fatura okuma için yapay zekâ: Google LLC (Gemini API) veya Anthropic PBC (Claude API)
+            (ABD). Bu sağlayıcılara olayın anlatımı ve dilekçe bilgileri ile, yüklerseniz faturanızın görüntüsü
+            gönderilir. Dilekçeye eklediğiniz adınız ve kimlik bilgileriniz gönderilmez.
           </li>
+          <li>Robot koruması: Cloudflare Inc. (Turnstile), yalnızca tarayıcı ve bağlantı bilgileri.</li>
           <li>Ödeme: gerçek ödemeye geçildiğinde ödeme kuruluşu (bu bölüm o zaman güncellenecektir).</li>
         </ul>
         <p>
@@ -96,7 +102,7 @@ const SAYFALAR: Record<string, { baslik: string; icerik: () => ReactNode }> = {
         <h2>5. Ne kadar süre saklıyoruz?</h2>
         <ul>
           <li>Dilekçe bilgileri: oluşturulduktan {site.dilekceSaklamaGun} gün sonra kendiliğinden silinir.</li>
-          <li>Yüklenen belgeler (fatura vb.): en geç {site.faturaSaklamaSaat} saat içinde silinir.</li>
+          <li>Yüklenen belgeler (fatura vb.): hiç kaydedilmez; okunduktan hemen sonra silinir.</li>
           <li>Ödeme kayıtları: vergi mevzuatının öngördüğü süre boyunca saklanır.</li>
         </ul>
 

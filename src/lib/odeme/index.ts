@@ -6,6 +6,7 @@
 //   2. Sağlayıcının geri dönüş adresi için bir API ucu ekleyin.
 //   3. Vercel'de ODEME_MODU=iyzico yapın ve sağlayıcının anahtarlarını girin.
 
+import { ayar } from "@/lib/ayar";
 import type { DilekceKaydi } from "@/lib/depo";
 
 export type OdemeBaslatma = {
@@ -31,7 +32,7 @@ const deneme: OdemeSaglayicisi = {
 const SAGLAYICILAR: Record<string, OdemeSaglayicisi> = { deneme };
 
 export function odemeModu(): string {
-  return process.env.ODEME_MODU || "deneme";
+  return ayar("ODEME_MODU") || "deneme";
 }
 
 export function odemeSaglayicisi(): OdemeSaglayicisi {

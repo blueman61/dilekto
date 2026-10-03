@@ -17,9 +17,9 @@ export default async function OlusturSayfasi(props: PageProps<"/olustur/[tur]">)
   const tur = turGetir((await props.params).tur);
   if (!tur) notFound();
   return (
-    <div className="kapsayici max-w-2xl py-8 sm:py-12">
-      <h1 className="text-2xl font-bold sm:text-3xl">{tur.ad}</h1>
-      <p className="mt-2 mb-8 text-gri">
+    <div className="kapsayici max-w-2xl py-6 sm:py-12">
+      <h1 className="text-xl font-bold sm:text-3xl">{tur.ad}</h1>
+      <p className="mt-2 mb-6 text-[0.95rem] text-gri sm:mb-8 sm:text-base">
         Önce ücretsiz testle başvurabileceğinizi kontrol edelim. Sonra olayı anlatın, önizlemeyi ücretsiz
         görün. Dilekçenin tamamı {tlYaz(tur.fiyat)}.
       </p>

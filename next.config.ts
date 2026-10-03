@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 // Deneme döneminde site arama motorlarına kapalıdır.
 // Açmak için Vercel'de SITE_ARAMA_MOTORLARINA_ACIK=evet yapılır.
-const aramaMotorlarinaAcik = process.env.SITE_ARAMA_MOTORLARINA_ACIK === "evet";
+const aramaMotorlarinaAcik = process.env.SITE_ARAMA_MOTORLARINA_ACIK?.trim() === "evet";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,

@@ -1,13 +1,31 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { turGetir } from "@/lib/dilekce-turleri";
 import type { Cevaplar, Soru } from "@/lib/dilekce-turleri/tipler";
-import { tutarYaz } from "@/lib/dilekce-turleri/ortak";
+import { tarihYaz, tutarYaz } from "@/lib/dilekce-turleri/ortak";
+import { dosyaHazirla } from "@/lib/belge/gorsel";
+import { useRobotDogrulama } from "./RobotDogrulama";
 import { UygunlukKutusu } from "./UygunlukKutusu";
 
-type Asama = "test" | "sonuc" | "hikaye" | "gonderiliyor";
+type Asama = "test" | "sonuc" | "fatura" | "hikaye" | "gonderiliyor";
+
+type FaturaBilgisi = { urun: string; satici: string; saticiAdres: string; tarih: string; tutar: number };
+
+/** Sunucu yanıtını okur; hata varsa hata koduyla birlikte anlaşılır bir mesaj fırlatır. */
+async function yanitiOku<T>(yanit: Response): Promise<T> {
+  const veri = (await yanit.json().catch(() => null)) as (T & { hata?: string; kod?: string }) | null;
+  if (yanit.ok && veri) return veri;
+  if (!veri) {
+    throw new Error(
+      yanit.status === 504
+        ? "İşlem çok uzun sürdü. Lütfen tekrar deneyin."
+        : `Sunucuya ulaşılamadı. Lütfen tekrar deneyin. (Hata kodu: HTTP-${yanit.status})`,
+    );
+  }
+  throw new Error(`${veri.hata ?? "Bir sorun oldu."}${veri.kod ? ` (Hata kodu: ${veri.kod})` : ""}`);
+}
 
 function oturumOku<T>(anahtar: string, varsayilan: T): T {
   try {
@@ -73,6 +91,12 @@ export function Sihirbaz({ turId }: { turId: string }) {
   const [sira, setSira] = useState(kayit?.sira ?? 0);
   const [hata, setHata] = useState<string | null>(null);
   const [sunucuHatasi, setSunucuHatasi] = useState<string | null>(null);
+  const [fatura, setFatura] = useState<{ okunuyor: boolean; hata: string | null; okunan: FaturaBilgisi | null }>({
+    okunuyor: false,
+    hata: null,
+    okunan: null,
+  });
+  const robot = useRobotDogrulama();
   const [tutarGirdisi, setTutarGirdisi] = useState(
     typeof kayit?.test.tutar === "string" ? kayit.test.tutar : "",
   );
@@ -130,7 +154,7 @@ export function Sihirbaz({ turId }: { turId: string }) {
     setHata(null);
     if (sira > 0) setSira(sira - 1);
     else if (asama === "hikaye") {
-      setAsama("sonuc");
+      setAsama(tur.faturaYukleme ? "fatura" : "sonuc");
     }
   }
 
@@ -141,10 +165,10 @@ export function Sihirbaz({ turId }: { turId: string }) {
       const yanit = await fetch("/api/taslak", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tur: tur.id, test, hikaye }),
+        body: JSON.stringify({ tur: tur.id, test, hikaye, robotJetonu: robot.jeton }),
       });
-      const veri = await yanit.json();
-      if (!yanit.ok) throw new Error(veri.hata || "Bir sorun oldu.");
+      robot.yenile();
+      const veri = await yanitiOku<{ id: string }>(yanit);
       try {
         sessionStorage.removeItem(anahtar);
       } catch {}
@@ -152,10 +176,44 @@ export function Sihirbaz({ turId }: { turId: string }) {
     } catch (e) {
       setSunucuHatasi((e as Error).message);
       setAsama("hikaye");
+      robot.yenile();
+    }
+  }
+
+  async function faturaYukle(e: ChangeEvent<HTMLInputElement>) {
+    const dosya = e.target.files?.[0];
+    e.target.value = "";
+    if (!dosya) return;
+    setFatura({ okunuyor: true, hata: null, okunan: null });
+    try {
+      const hazir = await dosyaHazirla(dosya);
+      const yanit = await fetch("/api/fatura", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dosya: hazir, robotJetonu: robot.jeton }),
+      });
+      robot.yenile();
+      const { bilgi } = await yanitiOku<{ bilgi: FaturaBilgisi }>(yanit);
+      // Okunan bilgileri, kullanıcının daha önce yazdıklarını ezmeden doldur
+      setHikaye((h) => {
+        const yeni: Cevaplar = { ...h };
+        for (const alan of ["urun", "satici", "saticiAdres"] as const) {
+          if (bilgi[alan] && !(typeof h[alan] === "string" && h[alan])) yeni[alan] = bilgi[alan];
+        }
+        const belgeler = Array.isArray(h.belgeler) ? h.belgeler : [];
+        if (!belgeler.includes("fatura")) yeni.belgeler = [...belgeler, "fatura"];
+        return yeni;
+      });
+      setFatura({ okunuyor: false, hata: null, okunan: bilgi });
+    } catch (hataNesnesi) {
+      robot.yenile();
+      setFatura({ okunuyor: false, hata: (hataNesnesi as Error).message, okunan: null });
     }
   }
 
   // --- Ekranlar -------------------------------------------------------------
+
+  function ekraniCiz() {
 
   if (asama === "gonderiliyor") {
     return (
@@ -163,6 +221,110 @@ export function Sihirbaz({ turId }: { turId: string }) {
         <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-marka-100 border-t-marka-600" />
         <h2 className="mt-5 text-xl font-bold">Dilekçeniz hazırlanıyor…</h2>
         <p className="mt-2 text-gri">Bu işlem 15-40 saniye sürebilir. Lütfen sayfayı kapatmayın.</p>
+      </div>
+    );
+  }
+
+  if (asama === "fatura") {
+    const okunan = fatura.okunan;
+    const farklar: string[] = [];
+    if (okunan?.tarih && okunan.tarih !== test.tarih)
+      farklar.push(`Faturadaki tarih ${tarihYaz(okunan.tarih)}, testte ${tarihYaz(String(test.tarih))} yazmıştınız.`);
+    if (okunan?.tutar && Math.abs(okunan.tutar - Number(test.tutar)) >= 1)
+      farklar.push(`Faturadaki tutar ${tutarYaz(okunan.tutar)}, testte ${tutarYaz(String(test.tutar))} yazmıştınız.`);
+    return (
+      <div className="kart">
+        <h2 className="text-xl font-bold">Faturanız elinizde mi?</h2>
+        <p className="mt-2 text-gri">
+          Faturanızın ya da sipariş özetinizin fotoğrafını yüklerseniz ürün ve satıcı bilgilerini sizin için
+          doldururuz. Bu adım isteğe bağlıdır.
+        </p>
+        <p className="mt-3 rounded-xl bg-zemin p-3 text-sm text-gri">
+          Dosyanız <strong>kaydedilmez</strong>. Yalnızca bilgileri okumak için yapay zekâ servisine gönderilir ve
+          hemen silinir.
+        </p>
+
+        {okunan ? (
+          <div className="mt-5 rounded-xl border-2 border-basari bg-basari-zemin p-4">
+            <p className="font-semibold text-basari">Faturanız okundu</p>
+            <ul className="mt-2 space-y-1 text-sm">
+              {okunan.urun && <li>Ürün / hizmet: {okunan.urun}</li>}
+              {okunan.satici && <li>Satıcı: {okunan.satici}</li>}
+              {okunan.saticiAdres && <li>Satıcı adresi: {okunan.saticiAdres}</li>}
+              {okunan.tarih && <li>Tarih: {tarihYaz(okunan.tarih)}</li>}
+              {okunan.tutar > 0 && <li>Tutar: {tutarYaz(okunan.tutar)}</li>}
+            </ul>
+            <p className="mt-2 text-sm">Sonraki ekranlarda bu bilgileri kontrol edip düzeltebilirsiniz.</p>
+            {farklar.length > 0 && (
+              <div className="mt-3 rounded-lg bg-uyari-zemin p-3 text-sm text-uyari">
+                {farklar.map((f) => (
+                  <p key={f}>{f}</p>
+                ))}
+                <button
+                  type="button"
+                  className="mt-2 font-semibold underline"
+                  onClick={() => {
+                    const yeniTest = {
+                      ...test,
+                      ...(okunan.tarih ? { tarih: okunan.tarih } : {}),
+                      ...(okunan.tutar ? { tutar: String(okunan.tutar) } : {}),
+                    };
+                    setTest(yeniTest);
+                    // Yeni bilgilerle uygunluk değiştiyse sonucu yeniden göster
+                    if (tur.uygunluk(yeniTest).durum !== sonuc.durum) setAsama("sonuc");
+                    if (okunan.tutar) setTutarGirdisi(String(okunan.tutar));
+                    setFatura((f) => ({ ...f, okunan: { ...okunan, tarih: "", tutar: 0 } }));
+                  }}
+                >
+                  Faturadaki bilgileri kullan
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <label
+            className={`mt-5 flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-marka-200 bg-marka-50 p-6 text-center ${
+              fatura.okunuyor || !robot.hazir ? "pointer-events-none opacity-60" : ""
+            }`}
+          >
+            <span className="text-3xl" aria-hidden="true">📄</span>
+            <span className="font-semibold text-marka-700">
+              {fatura.okunuyor ? "Faturanız okunuyor…" : !robot.hazir ? "Güvenlik kontrolü yapılıyor…" : "Fotoğraf çek ya da dosya seç"}
+            </span>
+            <span className="text-sm text-gri">Fotoğraf (JPG, PNG) ya da PDF</span>
+            <input
+              type="file"
+              accept="image/*,application/pdf"
+              className="sr-only"
+              disabled={fatura.okunuyor || !robot.hazir}
+              onChange={faturaYukle}
+            />
+          </label>
+        )}
+
+        {fatura.hata && (
+          <p className="mt-4 text-hata" role="alert">
+            {fatura.hata}
+          </p>
+        )}
+
+        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+          <button type="button" className="dugme-ikincil" onClick={() => setAsama("sonuc")}>
+            Geri
+          </button>
+          <button
+            type="button"
+            className="dugme"
+            disabled={fatura.okunuyor}
+            onClick={() => {
+              setAsama("hikaye");
+              setSira(0);
+              window.scrollTo({ top: 0 });
+            }}
+          >
+            {okunan ? "Devam et" : "Faturasız devam et"}
+          </button>
+        </div>
       </div>
     );
   }
@@ -176,7 +338,7 @@ export function Sihirbaz({ turId }: { turId: string }) {
             <button
               className="dugme"
               onClick={() => {
-                setAsama("hikaye");
+                setAsama(tur.faturaYukleme ? "fatura" : "hikaye");
                 setSira(0);
               }}
             >
@@ -367,12 +529,30 @@ export function Sihirbaz({ turId }: { turId: string }) {
             Geri
           </button>
           {soru.tip !== "secim" && (
-            <button type="button" className="dugme" onClick={() => ileri()}>
-              {asama === "hikaye" && sira === toplam - 1 ? "Önizlemeyi hazırla" : "Devam"}
+            <button
+              type="button"
+              className="dugme"
+              onClick={() => ileri()}
+              disabled={asama === "hikaye" && sira === toplam - 1 && !robot.hazir}
+            >
+              {asama === "hikaye" && sira === toplam - 1
+                ? robot.hazir
+                  ? "Önizlemeyi hazırla"
+                  : "Güvenlik kontrolü…"
+                : "Devam"}
             </button>
           )}
         </div>
       </div>
+    </div>
+  );
+  }
+
+  return (
+    <div>
+      {ekraniCiz()}
+      {/* Robot doğrulama kutusu, fatura ve olay adımlarında hazır bekler */}
+      <div hidden={asama !== "fatura" && asama !== "hikaye"}>{robot.alan}</div>
     </div>
   );
 }

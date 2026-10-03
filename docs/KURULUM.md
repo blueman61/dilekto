@@ -98,6 +98,52 @@ Deneme sitesi, her sayfasında arama motorlarına "beni listeleme" (`noindex`) d
 
 ---
 
+## Durum kontrolü ve hata kodları
+
+Bir şey çalışmazsa önce **durum kontrolü** sayfasını aç:
+
+`https://dilekto.vercel.app/durum?anahtar=CRON_SECRET_DEĞERİN`
+
+(`CRON_SECRET_DEĞERİN` yerine Vercel'de `CRON_SECRET` için yazdığın metni yaz.)
+
+Sayfa veritabanını ve yapay zekâyı tek tek dener. Her satırın yanında ✓ ya da ✕ görürsün; ✕ olan satırda **"Ne yapmalı"** kutusu çözümü yazar. Bu sayfa gerçek bir deneme dilekçesi ürettiği için ücretsiz kullanım hakkından bir istek harcar; gerektikçe aç.
+
+Ziyaretçiler bir hata gördüğünde mesajın sonunda bir **hata kodu** yazar (ör. `Hata kodu: VT-ANAHTAR`). Anlamları:
+
+| Kod | Anlamı | Ne yapmalı |
+|---|---|---|
+| `YZ-AYAR` | Yapay zekâ anahtarı girilmemiş | Vercel'de `GEMINI_API_KEY` ekle, yeniden yayınla |
+| `YZ-ANAHTAR` | Yapay zekâ anahtarı geçersiz | Google AI Studio'da yeni anahtar oluştur, Vercel'de güncelle |
+| `YZ-MODEL` | Model adı bulunamadı | Vercel'de `GEMINI_MODEL` ayarı varsa sil |
+| `YZ-KOTA` | Ücretsiz kullanım sınırı doldu | Bir süre bekle ya da AI Studio'da faturalandırmayı aç |
+| `YZ-BAGLANTI`, `YZ-DENETIM` | Geçici sorun | Birkaç dakika sonra tekrar dene; sürerse bana yaz |
+| `VT-AYAR` | Supabase ayarları girilmemiş | `SUPABASE_URL` ve `SUPABASE_SECRET_KEY` ekle |
+| `VT-ANAHTAR` | Supabase anahtarı yanlış türde | **secret** (`sb_secret_…`) ya da **service_role** anahtarını gir; "publishable"/"anon" çalışmaz |
+| `VT-TABLO` | Tablo oluşturulmamış | `supabase/kurulum.sql` dosyasını SQL Editor'da çalıştır |
+| `VT-BAGLANTI` | Supabase'e ulaşılamıyor | `SUPABASE_URL` değerini kontrol et; proje uyuduysa **Restore project** de |
+
+Ayarları yapıştırırken başa ya da sona karışan boşluklar artık kendiliğinden temizlenir.
+
+---
+
+## Robot koruması (Cloudflare Turnstile)
+
+Yapay zekâ isteklerini otomatik araçların (robotların) sömürmesini engeller; böylece maliyet kontrol altında kalır. Ziyaretçilerin çoğu hiçbir şey görmez; yalnızca şüpheli durumlarda tek tıklık bir kutu çıkar. **İsteğe bağlıdır**: ayarlar girilmezse site korumasız çalışır.
+
+1. **dash.cloudflare.com/sign-up** adresinde e-posta ve şifreyle ücretsiz hesap aç, e-postana gelen bağlantıyla hesabını doğrula.
+2. Sol menüde **Turnstile**'a tıkla (menüde göremezsen üstteki arama kutusuna "Turnstile" yaz).
+3. **Add widget** de:
+   - **Widget name:** `Dilekto`
+   - **Hostname management:** **Add Hostnames** de ve `dilekto.vercel.app` ekle (sitenin adresi farklıysa onu yaz). Alan adını bağladığında `dilekto.com` adresini de buraya ekleyeceğiz.
+   - **Widget Mode:** **Managed**
+   - **Create** de.
+4. Açılan ekranda iki anahtar görürsün:
+   - **Site Key** → Vercel'de `NEXT_PUBLIC_TURNSTILE_SITE_KEY` adıyla ekle
+   - **Secret Key** → Vercel'de `TURNSTILE_SECRET_KEY` adıyla ekle
+5. Vercel'de siteyi **yeniden yayınla** (aşağıdaki bölüme bak). Durum sayfasında "Robot koruması: açık" yazmalı.
+
+---
+
 ## Bir ayarı sonradan değiştirmek
 
 1. Vercel'de projene gir → **Settings** → **Environment Variables**.

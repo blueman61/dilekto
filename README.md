@@ -14,6 +14,8 @@ Tüketicilerin kendi dilekçelerini kolayca hazırlamasını sağlayan web uygul
 5. Önizlemede metnin yalnızca ilk paragrafı tarayıcıya gönderilir; tamamı ödemeden sonra açılır.
 6. Ad, TC kimlik no, adres ve telefon **sunucuya hiç gönderilmez**; dilekçeye tarayıcıda eklenir. PDF ve Word dosyaları da tarayıcıda üretilir.
 7. Kayıtlar 30 gün sonra her gece çalışan bir görevle silinir.
+8. Fatura yüklemek isteğe bağlıdır; dosya saklanmaz, yalnızca ürün/satıcı/tarih/tutar okunur.
+9. Hatalar kısa bir hata koduyla gösterilir; site sahibi `/durum?anahtar=<CRON_SECRET>` sayfasından ayarları ve bağlantıları kontrol edebilir.
 
 ## Klasörler
 
@@ -26,6 +28,9 @@ Tüketicilerin kendi dilekçelerini kolayca hazırlamasını sağlayan web uygul
 | `src/lib/ai/` | Yapay zekâ sağlayıcıları ve çıktı denetimi |
 | `src/lib/depo/` | Supabase (canlı) / bellek (yerel geliştirme) kayıt deposu |
 | `src/lib/odeme/` | Ödeme sağlayıcıları (şu an: deneme) |
+| `src/lib/hatalar.ts` | Hata kodları ve kullanıcı mesajları |
+| `src/lib/robot.ts` | Robot koruması (Cloudflare Turnstile, isteğe bağlı) |
+| `src/content/genel.ts` | Tanıtım sayfalarının ortak metinleri (adımlar, SSS) |
 | `src/lib/belge/` | PDF ve Word üretimi |
 | `supabase/kurulum.sql` | Veritabanı tablosu |
 | `testler/` | Otomatik testler |
