@@ -62,23 +62,41 @@ export function jsonAyikla(metin: string | undefined): unknown {
 // Gemini
 // ---------------------------------------------------------------------------
 
-// Model adları zamanla değişebildiği için sırayla denenir; çalışan model
+// Model adları zamanla değişebildiği ve ücretsiz katmanda her modelin kendi
+// kullanım sınırı olduğu için modeller sırayla denenir; çalışan model
 // hatırlanır. GEMINI_MODEL ayarlanırsa önce o denenir.
-const GEMINI_MODELLERI = ["gemini-flash-latest", "gemini-3.8-flash", "gemini-2.5-flash"];
+const GEMINI_MODELLERI = ["gemini-flash-latest", "gemini-3.8-flash", "gemini-3.5-flash", "gemini-2.5-flash"];
 let calisanGeminiModeli: string | null = null;
 
-function geminiHatasi(e: unknown, model: string): DilektoHatasi | "model-yok" | "sema-sorunu" {
-  if (e instanceof DilektoHatasi) return e;
+/** Vercel en fazla 60 sn bekler; denemeler bu süreyi aşmasın */
+const GEMINI_ZAMAN_SINIRI_MS = 40_000;
+const bekle = (ms: number) => new Promise((coz) => setTimeout(coz, ms));
+
+type GeminiSonucu =
+  | { tur: "model-yok" }
+  | { tur: "sema-sorunu"; ayrinti: string }
+  | { tur: "gecici"; kod: "YZ-KOTA" | "YZ-BAGLANTI"; ayrinti: string }
+  | { tur: "kalici"; hata: DilektoHatasi };
+
+/** Gemini hatasını sınıflandırır: başka modelle/tekrar denenebilir mi? */
+export function geminiHatasiniSinifla(e: unknown): GeminiSonucu {
+  if (e instanceof DilektoHatasi) return { tur: "kalici", hata: e };
   if (e instanceof ApiError) {
     const m = e.message ?? "";
-    if (e.status === 404) return "model-yok";
+    const ayrinti = `HTTP ${e.status}: ${m.slice(0, 300)}`;
+    if (e.status === 404) return { tur: "model-yok" };
     if (e.status === 401 || e.status === 403 || /api[ _-]?key/i.test(m))
-      return new DilektoHatasi("YZ-ANAHTAR", "Gemini anahtarı geçersiz.", m);
-    if (e.status === 429) return new DilektoHatasi("YZ-KOTA", "Gemini kullanım sınırı doldu.", m);
-    if (e.status === 400) return "sema-sorunu";
-    return new DilektoHatasi("YZ-BAGLANTI", `Gemini hata verdi (${e.status}, ${model}).`, m);
+      return { tur: "kalici", hata: new DilektoHatasi("YZ-ANAHTAR", "Gemini anahtarı geçersiz.", ayrinti) };
+    if (/location is not supported|not available in your (country|region)|unsupported.*(region|location)/i.test(m))
+      return {
+        tur: "kalici",
+        hata: new DilektoHatasi("YZ-BOLGE", "Gemini, sitenin çalıştığı bölgeden kullanılamıyor.", ayrinti),
+      };
+    if (e.status === 429) return { tur: "gecici", kod: "YZ-KOTA", ayrinti };
+    if (e.status === 400) return { tur: "sema-sorunu", ayrinti };
+    return { tur: "gecici", kod: "YZ-BAGLANTI", ayrinti };
   }
-  return new DilektoHatasi("YZ-BAGLANTI", "Gemini'ye ulaşılamadı.", e instanceof Error ? e.message : e);
+  return { tur: "gecici", kod: "YZ-BAGLANTI", ayrinti: e instanceof Error ? e.message : String(e) };
 }
 
 function gemini(): YapayZekaSaglayicisi {
@@ -115,40 +133,56 @@ function gemini(): YapayZekaSaglayicisi {
   return {
     ad: () => `gemini:${calisanGeminiModeli ?? adaylar[0]}`,
     async uret(istek) {
+      const baslangic = Date.now();
       const sira = calisanGeminiModeli
         ? [calisanGeminiModeli, ...adaylar.filter((m) => m !== calisanGeminiModeli)]
         : adaylar;
+      const denemeler: string[] = [];
+      let sonGeciciKod: "YZ-KOTA" | "YZ-BAGLANTI" | null = null;
+
       for (const model of sira) {
-        try {
-          const sonuc = await cagir(model, istek, true);
-          calisanGeminiModeli = model;
-          return sonuc;
-        } catch (e) {
-          const h = geminiHatasi(e, model);
-          if (h === "model-yok") {
-            console.warn(`Gemini modeli bulunamadı: ${model}, sıradaki deneniyor.`);
-            continue;
-          }
-          if (h === "sema-sorunu") {
-            // Bazı modeller JSON şemasını kabul etmeyebilir; şemasız dene
-            // (çıktı zaten bizim tarafımızda denetleniyor).
-            console.warn(`Gemini şemayı kabul etmedi (${model}), şemasız deneniyor:`, (e as Error).message);
-            try {
-              const sonuc = await cagir(model, istek, false);
-              calisanGeminiModeli = model;
-              return sonuc;
-            } catch (e2) {
-              const h2 = geminiHatasi(e2, model);
-              if (h2 === "model-yok") continue;
-              if (h2 === "sema-sorunu")
-                throw new DilektoHatasi("YZ-BAGLANTI", `Gemini isteği kabul etmedi (${model}).`, (e2 as Error).message);
-              throw h2;
+        let semaIle = true;
+        let geciciTekrar = 0;
+        // Aynı model: şema sorununda şemasız, geçici sorunda bir kez daha dene
+        while (Date.now() - baslangic < GEMINI_ZAMAN_SINIRI_MS) {
+          try {
+            const sonuc = await cagir(model, istek, semaIle);
+            calisanGeminiModeli = model;
+            return sonuc;
+          } catch (e) {
+            const s = geminiHatasiniSinifla(e);
+            if (s.tur === "kalici") throw s.hata;
+            if (s.tur === "model-yok") {
+              denemeler.push(`${model}: bulunamadı`);
+              break;
             }
+            if (s.tur === "sema-sorunu") {
+              denemeler.push(`${model}${semaIle ? "" : " (şemasız)"}: ${s.ayrinti}`);
+              if (semaIle) {
+                semaIle = false;
+                continue;
+              }
+              sonGeciciKod = "YZ-BAGLANTI";
+              break;
+            }
+            denemeler.push(`${model}: ${s.ayrinti}`);
+            sonGeciciKod = s.kod;
+            // Kota dolduysa aynı modeli tekrar denemenin anlamı yok
+            if (s.kod === "YZ-KOTA" || geciciTekrar >= 1) break;
+            geciciTekrar++;
+            await bekle(1500);
           }
-          throw h;
         }
       }
-      throw new DilektoHatasi("YZ-MODEL", `Denenen Gemini modellerinin hiçbiri bulunamadı: ${sira.join(", ")}`);
+      console.error("Gemini denemeleri başarısız:", denemeler);
+      if (!sonGeciciKod) {
+        throw new DilektoHatasi("YZ-MODEL", `Denenen Gemini modellerinin hiçbiri bulunamadı: ${sira.join(", ")}`);
+      }
+      throw new DilektoHatasi(
+        sonGeciciKod,
+        sonGeciciKod === "YZ-KOTA" ? "Gemini kullanım sınırı doldu." : "Gemini yanıt veremedi.",
+        denemeler,
+      );
     },
   };
 }

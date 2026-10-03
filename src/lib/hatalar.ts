@@ -9,6 +9,7 @@ export type HataKodu =
   | "YZ-RED" // yapay zekâ isteği reddetti
   | "YZ-DENETIM" // çıktı kurallarımıza uymadı
   | "YZ-BAGLANTI" // yapay zekâ servisine ulaşılamadı
+  | "YZ-BOLGE" // yapay zekâ, sitenin çalıştığı bölgede kullanılamıyor
   | "BELGE-OKUNAMADI" // yüklenen belge okunamadı
   | "VT-AYAR" // Supabase ayarları girilmemiş
   | "VT-ANAHTAR" // Supabase anahtarı yanlış (ör. secret yerine publishable)

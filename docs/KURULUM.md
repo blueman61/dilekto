@@ -116,7 +116,9 @@ Ziyaretçiler bir hata gördüğünde mesajın sonunda bir **hata kodu** yazar (
 | `YZ-ANAHTAR` | Yapay zekâ anahtarı geçersiz | Google AI Studio'da yeni anahtar oluştur, Vercel'de güncelle |
 | `YZ-MODEL` | Model adı bulunamadı | Vercel'de `GEMINI_MODEL` ayarı varsa sil |
 | `YZ-KOTA` | Ücretsiz kullanım sınırı doldu | Bir süre bekle ya da AI Studio'da faturalandırmayı aç |
-| `YZ-BAGLANTI`, `YZ-DENETIM` | Geçici sorun | Birkaç dakika sonra tekrar dene; sürerse bana yaz |
+| `YZ-BAGLANTI` | Gemini yanıt veremedi (çoğunlukla "model çok yoğun") | Site önce kendisi birkaç kez ve farklı modellerle dener. Birkaç dakika sonra tekrar dene; sürerse durum sayfasındaki "Ayrıntı" satırını bana gönder |
+| `YZ-DENETIM` | Yapay zekâ kurallara uygun metin üretemedi | Tekrar dene; sürerse bana yaz |
+| `YZ-BOLGE` | Gemini, sitenin çalıştığı sunucu bölgesinden kullanılamıyor | Vercel > **Settings** > **Functions** > **Function Region**: Washington, D.C., USA (iad1) seç, yeniden yayınla |
 | `VT-AYAR` | Supabase ayarları girilmemiş | `SUPABASE_URL` ve `SUPABASE_SECRET_KEY` ekle |
 | `VT-ANAHTAR` | Supabase anahtarı yanlış türde | **secret** (`sb_secret_…`) ya da **service_role** anahtarını gir; "publishable"/"anon" çalışmaz |
 | `VT-TABLO` | Tablo oluşturulmamış | `supabase/kurulum.sql` dosyasını SQL Editor'da çalıştır |

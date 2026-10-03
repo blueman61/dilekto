@@ -19,7 +19,10 @@ const COZUMLER: Partial<Record<HataKodu, string>> = {
   "YZ-ANAHTAR": "Yapay zekâ anahtarı geçersiz. Google AI Studio'da yeni anahtar oluşturup Vercel'deki GEMINI_API_KEY değerini güncelleyin, sonra yeniden yayınlayın.",
   "YZ-MODEL": "Model adı bulunamadı. Vercel'deki GEMINI_MODEL ayarını silin ya da güncel bir model adı yazın.",
   "YZ-KOTA": "Ücretsiz kullanım sınırı dolmuş. Bir süre bekleyin ya da Google AI Studio'da faturalandırmayı açın.",
-  "YZ-BAGLANTI": "Yapay zekâ servisine ulaşılamadı. Birkaç dakika sonra tekrar deneyin; sürerse bana yazın.",
+  "YZ-BAGLANTI":
+    "Yapay zekâ yanıt veremedi. Ücretsiz katmanda Google zaman zaman \"model çok yoğun\" (HTTP 503) yanıtı verir; birkaç dakika sonra sayfayı yenileyin. Sürerse yukarıdaki ayrıntı satırını bana gönderin.",
+  "YZ-BOLGE":
+    "Gemini, sitenin çalıştığı sunucu bölgesinden kullanılamıyor. Vercel > Settings > Functions > Function Region bölümünde Washington, D.C., USA (iad1) seçip yeniden yayınlayın.",
   "YZ-DENETIM": "Yapay zekâ kurallara uygun metin üretemedi. Tekrar deneyin; sürerse bana yazın.",
   "VT-AYAR": "Vercel'de SUPABASE_URL ve SUPABASE_SECRET_KEY ayarlarını ekleyip yeniden yayınlayın.",
   "VT-ANAHTAR": "Supabase, Vercel'deki SUPABASE_SECRET_KEY anahtarını kabul etmedi. Supabase > Project Settings > API Keys bölümünde \"Secret keys\" altındaki anahtarın (sb_secret_ ile başlar) yanındaki kopyala düğmesine basın; Vercel'deki SUPABASE_SECRET_KEY değerini silip bunu yapıştırın. SUPABASE_URL ile anahtarın aynı projeden olduğundan emin olun. Sonra yeniden yayınlayın.",
@@ -34,7 +37,7 @@ async function dene(ad: string, is: () => Promise<string>): Promise<Sonuc> {
     return { ad, tamam: true, bilgi: await is() };
   } catch (e) {
     const kod = e instanceof DilektoHatasi ? e.kod : undefined;
-    const ayrinti = e instanceof DilektoHatasi && e.detay ? ` (${JSON.stringify(e.detay).slice(0, 300)})` : "";
+    const ayrinti = e instanceof DilektoHatasi && e.detay ? ` — Ayrıntı: ${JSON.stringify(e.detay).slice(0, 900)}` : "";
     return { ad, tamam: false, kod, bilgi: `${(e as Error).message}${ayrinti}` };
   }
 }
