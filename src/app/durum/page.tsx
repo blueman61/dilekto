@@ -22,7 +22,7 @@ const COZUMLER: Partial<Record<HataKodu, string>> = {
   "YZ-BAGLANTI": "Yapay zekâ servisine ulaşılamadı. Birkaç dakika sonra tekrar deneyin; sürerse bana yazın.",
   "YZ-DENETIM": "Yapay zekâ kurallara uygun metin üretemedi. Tekrar deneyin; sürerse bana yazın.",
   "VT-AYAR": "Vercel'de SUPABASE_URL ve SUPABASE_SECRET_KEY ayarlarını ekleyip yeniden yayınlayın.",
-  "VT-ANAHTAR": "Supabase anahtarı yanlış türde. Supabase > Project Settings > API Keys bölümünden \"secret\" (sb_secret_ ile başlayan) ya da \"service_role\" anahtarını kopyalayıp Vercel'deki SUPABASE_SECRET_KEY değerini güncelleyin. \"publishable\" ya da \"anon\" anahtarı çalışmaz.",
+  "VT-ANAHTAR": "Supabase, Vercel'deki SUPABASE_SECRET_KEY anahtarını kabul etmedi. Supabase > Project Settings > API Keys bölümünde \"Secret keys\" altındaki anahtarın (sb_secret_ ile başlar) yanındaki kopyala düğmesine basın; Vercel'deki SUPABASE_SECRET_KEY değerini silip bunu yapıştırın. SUPABASE_URL ile anahtarın aynı projeden olduğundan emin olun. Sonra yeniden yayınlayın.",
   "VT-TABLO": "Tablo oluşturulmamış. Supabase > SQL Editor'da supabase/kurulum.sql dosyasının içeriğini çalıştırın.",
   "VT-BAGLANTI": "Supabase'e ulaşılamadı. Vercel'deki SUPABASE_URL değerinin https://xxxx.supabase.co biçiminde olduğunu kontrol edin; Supabase projeniz uykuya geçtiyse \"Restore project\" deyin.",
 };

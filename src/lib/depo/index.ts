@@ -66,76 +66,97 @@ type Satir = {
 
 type SupabaseHatasi = { message: string; code?: string; details?: string; hint?: string };
 
-/** Supabase hatasını, nedeni anlaşılır bir hata koduna çevirir. */
-export function vtHatasi(error: SupabaseHatasi, islem: string): DilektoHatasi {
+/**
+ * Supabase hatasını, nedeni anlaşılır bir hata koduna çevirir.
+ * Not: Supabase bazı yanıtlarda hata açıklaması göndermez; bu yüzden HTTP
+ * durum kodu da (401 = anahtar, 404 = tablo) dikkate alınır.
+ */
+export function vtHatasi(error: SupabaseHatasi, islem: string, durum?: number): DilektoHatasi {
   const m = `${error.message} ${error.details ?? ""} ${error.hint ?? ""}`;
-  if (error.code === "42501" || /row-level security|permission denied|invalid api key|jwt|unauthorized/i.test(m)) {
-    return new DilektoHatasi("VT-ANAHTAR", `${islem}: Supabase anahtarı yetkisiz (secret key girilmeli).`, error);
+  const ayrinti = { ...error, httpDurumu: durum };
+  if (
+    durum === 401 ||
+    durum === 403 ||
+    error.code === "42501" ||
+    /row-level security|permission denied|invalid api key|jwt|unauthorized/i.test(m)
+  ) {
+    return new DilektoHatasi(
+      "VT-ANAHTAR",
+      `${islem}: Supabase anahtarı kabul edilmedi (anahtar eksik/yanlış kopyalanmış, başka projeye ait ya da secret key değil).`,
+      ayrinti,
+    );
   }
-  if (error.code === "PGRST205" || error.code === "42P01" || /does not exist|could not find the table/i.test(m)) {
-    return new DilektoHatasi("VT-TABLO", `${islem}: dilekceler tablosu bulunamadı (kurulum.sql çalıştırılmalı).`, error);
+  if (
+    durum === 404 ||
+    error.code === "PGRST205" ||
+    error.code === "42P01" ||
+    /does not exist|could not find the table/i.test(m)
+  ) {
+    return new DilektoHatasi("VT-TABLO", `${islem}: dilekceler tablosu bulunamadı (kurulum.sql çalıştırılmalı).`, ayrinti);
   }
-  if (/fetch failed|enotfound|econnrefused|network/i.test(m)) {
-    return new DilektoHatasi("VT-BAGLANTI", `${islem}: Supabase'e ulaşılamadı (SUPABASE_URL kontrol edilmeli).`, error);
+  if (!durum || /fetch failed|enotfound|econnrefused|network/i.test(m)) {
+    return new DilektoHatasi("VT-BAGLANTI", `${islem}: Supabase'e ulaşılamadı (SUPABASE_URL kontrol edilmeli).`, ayrinti);
   }
-  return new DilektoHatasi("VT-HATA", `${islem}: ${error.message}`, error);
+  return new DilektoHatasi("VT-HATA", `${islem}: ${error.message || `HTTP ${durum}`}`, ayrinti);
 }
 
 class SupabaseDepo implements Depo {
   constructor(private db: SupabaseClient) {}
 
   async olustur(k: YeniKayit) {
-    const { data, error } = await this.db
+    const { data, error, status } = await this.db
       .from("dilekceler")
       .insert({ ...k, durum: "onizleme", silinecek: silinmeTarihi() })
       .select()
       .single<Satir>();
-    if (error) throw vtHatasi(error, "Kayıt oluşturma");
+    if (error) throw vtHatasi(error, "Kayıt oluşturma", status);
     return data;
   }
 
   async getir(id: string) {
     if (!UUID.test(id)) return null;
-    const { data, error } = await this.db
+    const { data, error, status } = await this.db
       .from("dilekceler")
       .select()
       .eq("id", id)
       .gt("silinecek", new Date().toISOString())
       .maybeSingle<Satir>();
-    if (error) throw vtHatasi(error, "Kayıt okuma");
+    if (error) throw vtHatasi(error, "Kayıt okuma", status);
     return data;
   }
 
   async odemeIsle(id: string, odeme: NonNullable<DilekceKaydi["odeme"]>) {
-    const { error } = await this.db
+    const { error, status } = await this.db
       .from("dilekceler")
       .update({ durum: "odendi", odeme })
       .eq("id", id)
       .eq("durum", "onizleme");
-    if (error) throw vtHatasi(error, "Ödeme kaydı");
+    if (error) throw vtHatasi(error, "Ödeme kaydı", status);
   }
 
   async sil(id: string) {
-    const { error } = await this.db.from("dilekceler").delete().eq("id", id);
-    if (error) throw vtHatasi(error, "Silme");
+    const { error, status } = await this.db.from("dilekceler").delete().eq("id", id);
+    if (error) throw vtHatasi(error, "Silme", status);
   }
 
   async bugunOlusturulan() {
-    const { count, error } = await this.db
+    const { count, error, status } = await this.db
       .from("dilekceler")
-      .select("id", { count: "exact", head: true })
-      .gte("olusturma", gunBasi());
-    if (error) throw vtHatasi(error, "Günlük sayım");
+      // "head" sorgusu hata açıklaması döndürmediği için küçük bir GET sorgusu
+      .select("id", { count: "exact" })
+      .gte("olusturma", gunBasi())
+      .limit(1);
+    if (error) throw vtHatasi(error, "Günlük sayım", status);
     return count ?? 0;
   }
 
   async suresiDolanlariSil() {
-    const { data, error } = await this.db
+    const { data, error, status } = await this.db
       .from("dilekceler")
       .delete()
       .lte("silinecek", new Date().toISOString())
       .select("id");
-    if (error) throw vtHatasi(error, "Silme");
+    if (error) throw vtHatasi(error, "Silme", status);
     return data?.length ?? 0;
   }
 }
@@ -192,6 +213,41 @@ class BellekDepo implements Depo {
 
 // ---------------------------------------------------------------------------
 
+/** "https://xxxx.supabase.co/rest/v1/" gibi yapıştırılan adresleri köke indirger. */
+export function supabaseAdresi(ham: string): string {
+  try {
+    const u = new URL(ham.includes("://") ? ham : `https://${ham}`);
+    return u.origin;
+  } catch {
+    throw new DilektoHatasi("VT-BAGLANTI", "SUPABASE_URL geçerli bir adres değil (https://xxxx.supabase.co olmalı).");
+  }
+}
+
+/** Yanlış türde (herkese açık) anahtar girildiyse hemen anlaşılır hata verir. */
+export function sunucuAnahtari(anahtar: string): string {
+  if (anahtar.startsWith("sb_publishable_")) {
+    throw new DilektoHatasi(
+      "VT-ANAHTAR",
+      "SUPABASE_SECRET_KEY olarak 'publishable' anahtar girilmiş; 'secret' (sb_secret_ ile başlayan) anahtar gerekli.",
+    );
+  }
+  const parcalar = anahtar.split(".");
+  if (parcalar.length === 3) {
+    try {
+      const yuk = JSON.parse(Buffer.from(parcalar[1], "base64url").toString("utf8")) as { role?: string };
+      if (yuk.role === "anon") {
+        throw new DilektoHatasi(
+          "VT-ANAHTAR",
+          "SUPABASE_SECRET_KEY olarak 'anon' anahtar girilmiş; 'service_role' ya da 'secret' anahtar gerekli.",
+        );
+      }
+    } catch (e) {
+      if (e instanceof DilektoHatasi) throw e;
+    }
+  }
+  return anahtar;
+}
+
 const kuresel = globalThis as unknown as { __dilektoDepo?: Depo };
 
 export function depo(): Depo {
@@ -200,7 +256,9 @@ export function depo(): Depo {
   const anahtar = ayar("SUPABASE_SECRET_KEY");
   if (url && anahtar) {
     kuresel.__dilektoDepo = new SupabaseDepo(
-      createClient(url, anahtar, { auth: { persistSession: false, autoRefreshToken: false } }),
+      createClient(supabaseAdresi(url), sunucuAnahtari(anahtar), {
+        auth: { persistSession: false, autoRefreshToken: false },
+      }),
     );
   } else if (process.env.NODE_ENV !== "production") {
     kuresel.__dilektoDepo = new BellekDepo();
