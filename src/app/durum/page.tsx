@@ -155,11 +155,11 @@ export default async function DurumSayfasi(props: PageProps<"/durum">) {
           <div key={s.ad} className={`rounded-2xl border-2 p-5 ${s.tamam ? "border-basari bg-basari-zemin" : "border-hata bg-hata-zemin"}`}>
             <p className="font-bold">
               {s.tamam ? "✓" : "✕"} {s.ad}
-              {s.kod && <span className="ml-2 rounded bg-white px-2 py-0.5 text-sm">{s.kod}</span>}
+              {s.kod && <span className="ml-2 rounded bg-yuzey px-2 py-0.5 text-sm">{s.kod}</span>}
             </p>
             <p className="mt-1 text-sm break-words">{s.bilgi}</p>
             {s.kod && COZUMLER[s.kod] && (
-              <p className="mt-3 rounded-xl bg-white p-3 text-sm">
+              <p className="mt-3 rounded-xl bg-yuzey p-3 text-sm">
                 <strong>Ne yapmalı: </strong>
                 {COZUMLER[s.kod]}
               </p>

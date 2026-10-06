@@ -36,6 +36,8 @@ export async function taslakUret(
   const saglayici = saglayiciSec();
   const secilebilir = tur.yapayZeka.secilebilirMevzuat(test, hikaye);
   let mesaj = tur.yapayZeka.kullaniciMesaji(test, hikaye);
+  // Kullanıcının kendi yazdıkları (denetimde, yapay zekânın eklediklerinden ayırmak için)
+  const kullaniciMetni = Object.values(hikaye).flat().join("\n");
   let sonSorunlar: string[] = [];
 
   for (let i = 0; i < DENEME_SAYISI; i++) {
@@ -55,7 +57,7 @@ export async function taslakUret(
       }
       throw e;
     }
-    const denetim = ciktiyiDenetle(ham, secilebilir);
+    const denetim = ciktiyiDenetle(ham, secilebilir, kullaniciMetni);
     if (denetim.tamam) return { cikti: denetim.cikti, saglayici: saglayici.ad() };
     sonSorunlar = denetim.sorunlar;
     mesaj += `\n\nÖnceki yanıtın şu kurallara uymadı, lütfen düzelterek baştan yaz:\n- ${denetim.sorunlar.join("\n- ")}`;

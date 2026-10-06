@@ -52,12 +52,35 @@ export function tarihYaz(iso: string): string {
   return m ? `${m[3]}.${m[2]}.${m[1]}` : iso;
 }
 
-export function bugunYaz(tarih: Date): string {
-  return tarih.toLocaleDateString("tr-TR", {
-    day: "2-digit",
-    month: "2-digit",
+const TR_SAAT_DILIMI = "Europe/Istanbul";
+
+/** Türkiye'de bugünün tarihi, "2026-10-06" biçiminde (sunucu UTC'de olsa da doğru gün) */
+export function istanbulTarihi(an: Date = new Date()): string {
+  return new Intl.DateTimeFormat("sv-SE", {
+    timeZone: TR_SAAT_DILIMI,
     year: "numeric",
-  });
+    month: "2-digit",
+    day: "2-digit",
+  }).format(an);
+}
+
+/** Dilekçedeki tarih: "06.10.2026" (Türkiye saatine göre) */
+export function bugunYaz(tarih: Date): string {
+  return tarihYaz(istanbulTarihi(tarih));
+}
+
+/**
+ * "Ayşe nur yılmaz" → "Ayşe Nur YILMAZ": adların ilk harfi büyük, soyad tamamen
+ * büyük harf (dilekçe imza düzeni). Tek sözcük yazıldıysa olduğu gibi büyük/küçük düzeltilir.
+ */
+export function adSoyadBicimi(girdi: string): string {
+  const parcalar = girdi.trim().split(/\s+/u).filter(Boolean);
+  if (parcalar.length === 0) return "";
+  const baslik = (k: string) =>
+    k.charAt(0).toLocaleUpperCase("tr-TR") + k.slice(1).toLocaleLowerCase("tr-TR");
+  if (parcalar.length === 1) return baslik(parcalar[0]);
+  const soyad = parcalar[parcalar.length - 1].toLocaleUpperCase("tr-TR");
+  return [...parcalar.slice(0, -1).map(baslik), soyad].join(" ");
 }
 
 /** 12499.9 → "12.499,90 TL" */
@@ -70,10 +93,11 @@ export function tutarYaz(tutar: string | number): string {
   })} TL`;
 }
 
+/** İki tarih arasındaki gün sayısı (bugün Türkiye saatine göre; saat dilimi ve yaz saati etkilemez) */
 export function gunFarki(isoTarih: string, bugun: Date): number {
-  const t = new Date(`${isoTarih}T00:00:00`);
-  const b = new Date(bugun.getFullYear(), bugun.getMonth(), bugun.getDate());
-  return Math.round((b.getTime() - t.getTime()) / 86_400_000);
+  const [y1, m1, d1] = isoTarih.split("-").map(Number);
+  const [y2, m2, d2] = istanbulTarihi(bugun).split("-").map(Number);
+  return Math.round((Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) / 86_400_000);
 }
 
 export function tek(c: Cevaplar, id: string): string {
@@ -92,6 +116,62 @@ export function secenekEtiketi(sorular: Soru[], id: string, deger: string): stri
     return soru.secenekler.find((s) => s.deger === deger)?.etiket ?? deger;
   }
   return deger;
+}
+
+/** "2026-02-30" gibi var olmayan günleri ve makul olmayan yılları (1990 öncesi, bugünden 1 yıl sonrası) reddeder */
+export function gercekTarihMi(iso: string): boolean {
+  const [y, m, g] = iso.split("-").map(Number);
+  const d = new Date(Date.UTC(y, m - 1, g));
+  if (d.getUTCFullYear() !== y || d.getUTCMonth() !== m - 1 || d.getUTCDate() !== g) return false;
+  return y >= 1990 && y <= new Date().getUTCFullYear() + 1;
+}
+
+/** Görünmez kontrol karakterlerini ve yön değiştiren (bidi) işaretlerini temizler; satır sonlarını korur. */
+export function temizMetin(girdi: string, satirSonuKalsin = false): string {
+  const kontrol = satirSonuKalsin ? /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g : /[\u0000-\u001F\u007F]/g;
+  return girdi
+    .normalize("NFC")
+    .replace(/\r\n?/g, "\n")
+    .replace(kontrol, satirSonuKalsin ? "" : " ")
+    .replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u2069\uFEFF]/g, "")
+    .replace(/[ \t]+\n/g, "\n")
+    .trim();
+}
+
+/** Metni tek satıra indirir (şablona yerleştirilecek değerler için): satır sonları ve art arda boşluklar tek boşluk olur. */
+export function tekSatir(girdi: string | undefined): string {
+  return (girdi ?? "").replace(/\s+/gu, " ").trim();
+}
+
+function lunMu(numara: string): boolean {
+  let toplam = 0;
+  let cift = false;
+  for (let i = numara.length - 1; i >= 0; i--) {
+    let n = Number(numara[i]);
+    if (cift) {
+      n *= 2;
+      if (n > 9) n -= 9;
+    }
+    toplam += n;
+    cift = !cift;
+  }
+  return toplam % 10 === 0;
+}
+
+/**
+ * Serbest metinde yazılmaması gereken kimlik/finans numaralarını bulur:
+ * geçerli T.C. kimlik numarası, IBAN ve kredi kartı numarası. Bunlar yapay zekâ
+ * servisine gönderilmemeli; kimlik bilgileri dilekçeye tarayıcıda eklenir.
+ */
+export function hassasVeriBul(metin: string): ("TC kimlik numarası" | "IBAN" | "kart numarası")[] {
+  const bulunan = new Set<"TC kimlik numarası" | "IBAN" | "kart numarası">();
+  for (const m of metin.matchAll(/(?<!\d)[1-9]\d{10}(?!\d)/g)) if (tcGecerliMi(m[0])) bulunan.add("TC kimlik numarası");
+  if (/\bTR\s?\d{2}(?:\s?\d{4}){5}\s?\d{2}\b/i.test(metin)) bulunan.add("IBAN");
+  for (const m of metin.matchAll(/(?<!\d)(?:\d[ -]?){13,19}(?!\d)/g)) {
+    const sade = m[0].replace(/[ -]/g, "");
+    if (sade.length >= 13 && sade.length <= 19 && lunMu(sade)) bulunan.add("kart numarası");
+  }
+  return [...bulunan];
 }
 
 /**
@@ -124,21 +204,28 @@ export function cevaplariDogrula(sorular: Soru[], ham: unknown): Cevaplar {
       case "metin":
       case "uzunMetin": {
         if (typeof d !== "string") throw new Error(`"${s.soru}" metin olmalı.`);
-        const m = d.trim();
+        const m = temizMetin(d, s.tip === "uzunMetin");
         if (s.enKisa && m.length < s.enKisa)
           throw new Error(`"${s.soru}" için en az ${s.enKisa} karakter yazın.`);
         if (m.length > s.enUzun)
           throw new Error(`"${s.soru}" en fazla ${s.enUzun} karakter olabilir.`);
-        temiz[s.id] = m;
+        const hassas = hassasVeriBul(m);
+        if (hassas.length)
+          throw new Error(
+            `"${s.soru}" alanında ${hassas.join(", ")} yazmayın. Kimlik bilgileriniz dilekçeye sonradan, yalnızca cihazınızda eklenir.`,
+          );
+        temiz[s.id] = s.tip === "metin" ? tekSatir(m) : m;
         break;
       }
       case "tarih":
-        if (typeof d !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(d) || isNaN(Date.parse(d)))
+        if (typeof d !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(d) || !gercekTarihMi(d))
           throw new Error(`"${s.soru}" için geçerli bir tarih seçin.`);
         temiz[s.id] = d;
         break;
       case "tutar": {
-        const sayi = Number(String(d).replace(",", "."));
+        if (typeof d !== "string" && typeof d !== "number") throw new Error(`"${s.soru}" için geçerli bir tutar yazın.`);
+        const ham = String(d).trim().replace(",", ".");
+        const sayi = /^\d{1,10}(\.\d{1,2})?$/.test(ham) ? Number(ham) : NaN;
         if (!Number.isFinite(sayi) || sayi <= 0 || (s.enFazla && sayi > s.enFazla))
           throw new Error(`"${s.soru}" için geçerli bir tutar yazın.`);
         temiz[s.id] = String(Math.round(sayi * 100) / 100);

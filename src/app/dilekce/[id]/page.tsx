@@ -73,7 +73,7 @@ export default async function DilekceSayfasi(props: PageProps<"/dilekce/[id]">) 
       <UygunlukKutusu sonuc={tur.uygunluk(kayit.test, new Date(kayit.olusturma))} />
 
       <h1 className="mt-8 text-2xl font-bold">Dilekçenizin önizlemesi</h1>
-      <div className="relative mt-4 overflow-hidden rounded-2xl border border-cizgi bg-white p-6 font-serif shadow-sm sm:p-10">
+      <div className="relative mt-4 overflow-hidden rounded-2xl border border-cizgi bg-kagit p-6 font-serif text-kagit-yazi shadow-sm sm:p-10">
         <p className="text-center font-bold">[İL / İLÇE] TÜKETİCİ HAKEM HEYETİ BAŞKANLIĞINA</p>
         <p className="mt-6">
           <strong>KONU:</strong> {kayit.cikti.konuOzeti}
@@ -82,11 +82,11 @@ export default async function DilekceSayfasi(props: PageProps<"/dilekce/[id]">) 
         <p className="mt-2">1. {ilkParagraf}</p>
         <div className="mt-4 space-y-3 blur-[4px] select-none" aria-hidden="true">
           {Array.from({ length: Math.max(gizliParagraf, 2) * 3 + 6 }).map((_, i) => (
-            <div key={i} className="h-3 rounded bg-cizgi" style={{ width: `${70 + ((i * 37) % 30)}%` }} />
+            <div key={i} className="h-3 rounded bg-kagit-yazi/15" style={{ width: `${70 + ((i * 37) % 30)}%` }} />
           ))}
         </div>
-        <div className="absolute inset-x-0 bottom-0 flex h-2/3 items-end justify-center bg-gradient-to-t from-white via-white/90 to-transparent p-6">
-          <p className="rounded-full bg-murekkep px-4 py-2 text-sm font-semibold text-white">
+        <div className="absolute inset-x-0 bottom-0 flex h-2/3 items-end justify-center bg-gradient-to-t from-kagit via-kagit/90 to-transparent p-6">
+          <p className="rounded-full bg-kagit-yazi px-4 py-2 text-sm font-semibold text-kagit">
             Dilekçenin devamı ödemeden sonra açılır
           </p>
         </div>

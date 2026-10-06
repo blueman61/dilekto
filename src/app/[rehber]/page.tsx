@@ -171,7 +171,7 @@ export default async function RehberSayfasi(props: PageProps<"/[rehber]">) {
           Köşeli parantez içindeki yerleri kendi bilgilerinizle doldurun. Dilekto, verdiğiniz bilgilerle bu
           boşlukları sizin için doldurur ve metni olayınıza göre yazar.
         </p>
-        <div className="rounded-2xl border border-cizgi bg-white p-5 font-serif text-[0.95rem] leading-relaxed shadow-sm sm:p-8">
+        <div className="rounded-2xl border border-cizgi bg-kagit p-5 font-serif text-[0.95rem] text-kagit-yazi leading-relaxed shadow-sm sm:p-8">
           <p className="text-center font-bold">[İL / İLÇE] TÜKETİCİ HAKEM HEYETİ BAŞKANLIĞINA</p>
           <p className="mt-4">
             <strong>BAŞVURU SAHİBİ:</strong> [Adınız Soyadınız], [TC kimlik numaranız], [Adresiniz]

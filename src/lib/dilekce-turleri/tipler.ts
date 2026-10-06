@@ -65,6 +65,32 @@ export type BasvuruAdimlari = {
   notlar: string[];
 };
 
+/** Dilekçe metninin biçim/içerik kurallarına göre denetimi (bkz. docs/DILEKCE-KURALLARI.md) */
+export type KontrolMaddesi = {
+  id: string;
+  baslik: string;
+  durum: "tamam" | "uyari" | "eksik";
+  /** Eksikse ya da uyarıdaysa ne yapılacağı */
+  ayrinti?: string;
+  /** Kuralın dayanağı (ör. "3071 s. Kanun m. 4") */
+  kaynak?: string;
+  /** Kanun/yönetmelik gereği zorunlu mu, yoksa öneri mi */
+  zorunlu: boolean;
+};
+
+export type BasvuruYolu = {
+  id: "edevlet" | "elden" | "posta";
+  baslik: string;
+  /** Kısa tanıtım: kimlere uygun */
+  ozet: string;
+  /** Başlamadan önce hazırlanacaklar */
+  hazirlik: string[];
+  adimlar: string[];
+  /** Başvurudan sonra saklanacak / yapılacaklar */
+  sonra: string[];
+  notlar: string[];
+};
+
 export type DilekceTuru = {
   /** Adreste görünen kısa ad, ör. "hakem-heyeti" */
   id: string;
@@ -97,6 +123,13 @@ export type DilekceTuru = {
 
   belgeListesi: (test: Cevaplar, hikaye: Cevaplar) => BelgeMaddesi[];
   basvuruAdimlari: BasvuruAdimlari;
+  /** Ödemeden sonra gösterilen "dilekçeyi nereye, nasıl vereceksiniz" rehberi */
+  basvuruYollari: (il?: string) => BasvuruYolu[];
+  /** Başvurudan sonra ne olur (kanun maddelerine dayalı) */
+  basvuruSonrasi: string[];
+
+  /** Düzenlenmiş metni kurallara göre denetler (editörde canlı gösterilir) */
+  metniDenetle: (metin: string) => KontrolMaddesi[];
 
   /** Dilekçenin düz metnini oluşturur (PDF ve Word bu metinden üretilir) */
   metinOlustur: (girdi: {

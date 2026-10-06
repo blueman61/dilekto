@@ -5,6 +5,7 @@ Tüketicilerin kendi dilekçelerini kolayca hazırlamasını sağlayan web uygul
 - Kurulum ve yayına alma: [docs/KURULUM.md](docs/KURULUM.md)
 - Ödeme (deneme modu ve Shopier): [docs/ODEME.md](docs/ODEME.md)
 - Pazarlama planı (ilk 100 müşteri): [docs/PAZARLAMA-PLANI.md](docs/PAZARLAMA-PLANI.md)
+- Resmî dilekçe yazım kuralları ve kaynakları: [docs/DILEKCE-KURALLARI.md](docs/DILEKCE-KURALLARI.md)
 
 ## Nasıl çalışır?
 
@@ -16,7 +17,9 @@ Tüketicilerin kendi dilekçelerini kolayca hazırlamasını sağlayan web uygul
 6. Ad, TC kimlik no, adres ve telefon **sunucuya hiç gönderilmez**; dilekçeye tarayıcıda eklenir. PDF ve Word dosyaları da tarayıcıda üretilir.
 7. Kayıtlar 30 gün sonra her gece çalışan bir görevle silinir.
 8. Fatura yüklemek isteğe bağlıdır; dosya saklanmaz, yalnızca ürün/satıcı/tarih/tutar okunur.
-9. Hatalar kısa bir hata koduyla gösterilir; site sahibi `/durum?anahtar=<CRON_SECRET>` sayfasından ayarları ve bağlantıları kontrol edebilir.
+9. Ödemeden sonra kullanıcıya **dilekçenin nereye, nasıl verileceği** (e-Devlet, elden, posta) adım adım gösterilir; dilekçe, resmî kurallara göre canlı denetlenir (`hakem-heyeti/kurallar.ts`).
+10. Site açık ya da koyu temada görüntülenir; seçim cihazda saklanır (`src/lib/tema.ts`).
+11. Hatalar kısa bir hata koduyla gösterilir; site sahibi `/durum?anahtar=<CRON_SECRET>` sayfasından ayarları ve bağlantıları kontrol edebilir.
 
 ## Klasörler
 
@@ -52,7 +55,7 @@ Tüketicilerin kendi dilekçelerini kolayca hazırlamasını sağlayan web uygul
 ```bash
 npm install
 YAPAY_ZEKA=ornek npm run dev   # anahtarsız yerel deneme (yapay zekâ yerine örnek metin)
-npm test                       # otomatik testler
+npm test                       # otomatik testler (uygunluk, metin, doğrulama, yapay zekâ, API uçları)
 npm run kontrol                # yasaklı ifade taraması (her derlemede otomatik çalışır)
 npm run build
 ```

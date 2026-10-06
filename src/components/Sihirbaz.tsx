@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { turGetir } from "@/lib/dilekce-turleri";
 import type { Cevaplar, Soru } from "@/lib/dilekce-turleri/tipler";
-import { tarihYaz, tutarYaz } from "@/lib/dilekce-turleri/ortak";
+import { hassasVeriBul, istanbulTarihi, tarihYaz, tutarYaz } from "@/lib/dilekce-turleri/ortak";
 import { dosyaHazirla } from "@/lib/belge/gorsel";
 import { useRobotDogrulama } from "./RobotDogrulama";
 import { UygunlukKutusu } from "./UygunlukKutusu";
@@ -45,8 +45,7 @@ function oturumYaz(anahtar: string, deger: unknown) {
 }
 
 function bugunIso(): string {
-  const d = new Date();
-  return new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
+  return istanbulTarihi();
 }
 
 /** "12.499,90" / "12499.9" / "12.499" → "12499.9" */
@@ -64,6 +63,9 @@ function soruHatasi(s: Soru, d: string | string[] | undefined): string | null {
     const m = d.trim();
     if (s.enKisa && m.length < s.enKisa) return `Lütfen biraz daha ayrıntı yazın (en az ${s.enKisa} karakter).`;
     if (m.length > s.enUzun) return `En fazla ${s.enUzun} karakter yazabilirsiniz.`;
+    const hassas = hassasVeriBul(m);
+    if (hassas.length)
+      return `Lütfen ${hassas.join(", ")} yazmayın. Kimlik bilgileriniz dilekçeye sonradan, yalnızca cihazınızda eklenir.`;
   }
   if (s.tip === "tutar" && typeof d === "string") {
     const n = Number(d);

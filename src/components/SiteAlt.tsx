@@ -2,6 +2,7 @@ import Link from "next/link";
 import { site } from "@/config/site";
 import { Logo } from "./Logo";
 import { SORUMLULUK_METNI } from "./Sorumluluk";
+import { TemaSecici } from "./TemaSecici";
 
 export function SiteAlt() {
   return (
@@ -50,6 +51,9 @@ export function SiteAlt() {
         </nav>
       </div>
       <div className="border-t border-cizgi">
+        <div className="kapsayici pt-5">
+          <TemaSecici />
+        </div>
         <p className="kapsayici py-5 text-xs leading-relaxed text-gri">
           {SORUMLULUK_METNI} © {new Date().getFullYear()} {site.ad}
         </p>

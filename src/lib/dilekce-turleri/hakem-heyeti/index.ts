@@ -3,6 +3,7 @@
 import { HAKEM_HEYETI_SINIRI, hukukiNedenlerYaz } from "@/lib/mevzuat";
 import { YASAKLI_IFADELER_METIN } from "@/lib/yasakli-ifadeler";
 import {
+  adSoyadBicimi,
   bugunYaz,
   buyukHarf,
   coklu,
@@ -10,8 +11,11 @@ import {
   secenekEtiketi,
   tarihYaz,
   tek,
+  tekSatir,
   tutarYaz,
 } from "../ortak";
+import { BASVURU_SONRASI, basvuruYollari } from "./basvuru";
+import { dilekceKontrol } from "./kurallar";
 import type {
   BelgeMaddesi,
   Cevaplar,
@@ -483,7 +487,8 @@ const BASVURU_ADIMLARI = {
 // ---------------------------------------------------------------------------
 
 function yerTutucu(deger: string | undefined, yer: string): string {
-  return deger && deger.trim() ? deger.trim() : `[${yer}]`;
+  const d = tekSatir(deger);
+  return d ? d : `[${yer}]`;
 }
 
 function metinOlustur({
@@ -493,11 +498,9 @@ function metinOlustur({
   kisisel,
   tarih,
 }: Parameters<DilekceTuru["metinOlustur"]>[0]): string {
-  const il = kisisel.il?.trim();
-  const ilce = kisisel.ilce?.trim();
+  const il = tekSatir(kisisel.il);
+  const ilce = tekSatir(kisisel.ilce);
   const yerAdi = il ? (ilce ? `${il} / ${ilce}` : il) : "[İl / İlçe]";
-  const adSoyad = yerTutucu(kisisel.adSoyad, "Adınız Soyadınız");
-
   const konu = tek(test, "konu");
   const hizmet = konu === "ayipli_hizmet";
   const izinli = new Set(mevzuat(test).secilebilir);
@@ -506,9 +509,12 @@ function metinOlustur({
     ...cikti.ekMevzuat.filter((id) => izinli.has(id)),
   ];
 
+  // Ekler imzadan sonra, "EKLER:" başlığı altında numaralı yazılır (resmî yazışma düzeni).
   const ekler = belgeListesi(test, hikaye)
     .filter((b) => b.elinde && !b.ad.startsWith("Bu dilekçe"))
-    .map((b, i) => `${i + 1}. ${b.ad.replace(/\s*\(varsa\)$/, "")} örneği`);
+    .map((b, i) => `${i + 1}- ${b.ad.replace(/\s*\(varsa\)$/, "")}`);
+
+  const adSoyad = adSoyadBicimi(tekSatir(kisisel.adSoyad)) || "[Adınız Soyadınız]";
 
   const satirlar = [
     `${buyukHarf(yerAdi)} TÜKETİCİ HAKEM HEYETİ BAŞKANLIĞINA`,
@@ -518,32 +524,32 @@ function metinOlustur({
     `T.C. Kimlik No: ${yerTutucu(kisisel.tcKimlik, "TC kimlik numaranız")}`,
     `Adres: ${yerTutucu(kisisel.adres, "Adresiniz")}`,
     `Telefon: ${yerTutucu(kisisel.telefon, "Telefonunuz")}`,
-    ...(kisisel.eposta?.trim() ? [`E-posta: ${kisisel.eposta.trim()}`] : []),
+    ...(tekSatir(kisisel.eposta) ? [`E-posta: ${tekSatir(kisisel.eposta)}`] : []),
     "",
     `KARŞI TARAF (${hizmet ? "HİZMET SAĞLAYICI" : "SATICI"})`,
-    `Unvanı: ${tek(hikaye, "satici")}`,
+    `Unvanı: ${tekSatir(tek(hikaye, "satici")) || "[Satıcının unvanı]"}`,
     `Adresi: ${yerTutucu(tek(hikaye, "saticiAdres"), "Satıcının adresi")}`,
     "",
-    `UYUŞMAZLIK KONUSU ${hizmet ? "HİZMET" : "MAL"}: ${tek(hikaye, "urun")}`,
+    `UYUŞMAZLIK KONUSU ${hizmet ? "HİZMET" : "MAL"}: ${tekSatir(tek(hikaye, "urun")) || "[Ürün ya da hizmet]"}`,
     `SATIN ALMA TARİHİ: ${tarihYaz(tek(test, "tarih"))}`,
     `UYUŞMAZLIK DEĞERİ: ${tutarYaz(tek(test, "tutar"))}`,
     "",
-    `KONU: ${cikti.konuOzeti}`,
+    `KONU: ${tekSatir(cikti.konuOzeti)}`,
     "",
     "AÇIKLAMALAR:",
-    ...cikti.olaylar.flatMap((p, i) => [`${i + 1}. ${p}`, ""]),
+    ...cikti.olaylar.flatMap((p, i) => [`${i + 1}. ${tekSatir(p)}`, ""]),
     `HUKUKİ NEDENLER: ${hukukiNedenlerYaz(atiflar)} ve ilgili mevzuat.`,
     "",
-    "DELİLLER VE EKLER:",
-    ...(ekler.length ? ekler : ["1. [Eklediğiniz belgeleri yazın]"]),
+    "DELİLLER: Ekte sunulan belgeler ve her türlü yasal delil.",
     "",
-    `SONUÇ VE İSTEM: ${cikti.talepMetni}`,
+    `SONUÇ VE İSTEM: ${tekSatir(cikti.talepMetni)}`,
     "",
     `Tarih: ${bugunYaz(tarih)}`,
-    "",
-    "Başvuru Sahibi",
-    adSoyad,
     "İmza",
+    adSoyad,
+    "",
+    "EKLER:",
+    ...(ekler.length ? ekler : ["1- [Eklediğiniz belgeleri yazın]"]),
   ];
   return satirlar.join("\n");
 }
@@ -585,5 +591,8 @@ export const hakemHeyeti: DilekceTuru = {
   ],
   belgeListesi,
   basvuruAdimlari: BASVURU_ADIMLARI,
+  basvuruYollari,
+  basvuruSonrasi: BASVURU_SONRASI,
   metinOlustur,
+  metniDenetle: dilekceKontrol,
 };

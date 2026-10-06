@@ -306,7 +306,8 @@ export function depo(): Depo {
         auth: { persistSession: false, autoRefreshToken: false },
       }),
     );
-  } else if (process.env.NODE_ENV !== "production") {
+  } else if (process.env.NODE_ENV !== "production" || ayar("TEST_DEPO_BELLEK") === "evet") {
+    // Yalnızca geliştirme ve otomatik testler için (kayıtlar sunucu yeniden başlayınca silinir)
     kuresel.__dilektoDepo = new BellekDepo();
   } else {
     throw new DilektoHatasi("VT-AYAR", "SUPABASE_URL ve SUPABASE_SECRET_KEY ayarlanmamış (bkz. docs/KURULUM.md).");

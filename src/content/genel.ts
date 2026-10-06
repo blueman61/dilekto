@@ -58,7 +58,7 @@ export const SSS = [
   },
   {
     s: "Hakem heyeti ne kadar sürede karar verir?",
-    c: "Bakanlık uygulamasına göre değişmekle birlikte başvurular genellikle birkaç ay içinde sonuçlanır. Başvurunuzun durumunu e-Devlet'ten takip edebilirsiniz.",
+    c: "Süre heyetin yoğunluğuna göre değişir; Dilekto süre ya da sonuç hakkında söz vermez. e-Devlet'ten başvurduysanız başvurunuzun durumunu aynı hizmetten takip edebilirsiniz.",
   },
   {
     s: "Ödemeden sonra iade alabilir miyim?",

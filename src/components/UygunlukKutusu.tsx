@@ -12,7 +12,7 @@ export function UygunlukKutusu({ sonuc }: { sonuc: UygunlukSonucu }) {
     <div className={`rounded-2xl border-2 p-5 sm:p-6 ${s.kutu}`} role="status">
       <div className="flex items-start gap-3">
         <span
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-lg font-bold ${s.renk}`}
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-yuzey text-lg font-bold ${s.renk}`}
           aria-hidden="true"
         >
           {s.ikon}

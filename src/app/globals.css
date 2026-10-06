@@ -8,6 +8,7 @@
   --color-marka-700: #1a45b0;
   --color-marka-800: #1b3c8c;
   --color-marka-900: #172f66;
+  --color-marka-hover: #1a45b0;
   --color-murekkep: #13203a;
   --color-gri: #55617a;
   --color-zemin: #f6f8fb;
@@ -18,6 +19,11 @@
   --color-uyari-zemin: #fff5e0;
   --color-hata: #b4231b;
   --color-hata-zemin: #fdeceb;
+  /* Yüzeyler: sayfa arka planı, kartlar/giriş kutuları ve "kâğıt" (dilekçe önizlemesi) */
+  --color-sayfa: #ffffff;
+  --color-yuzey: #ffffff;
+  --color-kagit: #ffffff;
+  --color-kagit-yazi: #13203a;
   --font-sans: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-serif: "Times New Roman", "Liberation Serif", Georgia, serif;
 }
@@ -28,8 +34,46 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+
+/*
+ * Koyu tema. Tema, <html data-theme="dark|light"> ile seçilir; bu özelliği
+ * sayfa açılırken küçük bir betik (src/app/layout.tsx) ve tema düğmesi
+ * (src/components/TemaSecici.tsx) ayarlar. Seçim cihazda saklanır.
+ */
+:root[data-theme="dark"] {
+  --color-marka-50: #12213f;
+  --color-marka-100: #1a2f5e;
+  --color-marka-200: #2c4b8f;
+  --color-marka-600: #3a6cf0;
+  --color-marka-700: #9db9ff;
+  --color-marka-800: #c3d4ff;
+  --color-marka-900: #dfe8ff;
+  --color-marka-hover: #2f5bd0;
+  --color-murekkep: #e9eefb;
+  --color-gri: #a9b6d0;
+  --color-zemin: #0f182b;
+  --color-cizgi: #2b3a5a;
+  --color-basari: #3ddc97;
+  --color-basari-zemin: #0f2b21;
+  --color-uyari: #f5b94d;
+  --color-uyari-zemin: #2d2410;
+  --color-hata: #ff8f87;
+  --color-hata-zemin: #301415;
+  --color-sayfa: #0b1220;
+  --color-yuzey: #151f35;
+  --color-kagit: #f4f2ec;
+  --color-kagit-yazi: #16213a;
+}
+
+html {
+  color-scheme: light;
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 body {
-  background: #ffffff;
+  background: var(--color-sayfa);
   color: var(--color-murekkep);
   font-family: var(--font-sans);
   line-height: 1.6;
@@ -42,16 +86,16 @@ body {
 
 @layer components {
   .dugme {
-    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-marka-600 px-6 py-3 text-center font-semibold text-white shadow-sm transition hover:bg-marka-700 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-marka-600 px-6 py-3 text-center font-semibold text-white shadow-sm transition hover:bg-marka-hover disabled:cursor-not-allowed disabled:opacity-60;
   }
   .dugme-ikincil {
-    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-marka-600 bg-white px-6 py-3 text-center font-semibold text-marka-700 transition hover:bg-marka-50 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-marka-600 bg-yuzey px-6 py-3 text-center font-semibold text-marka-700 transition hover:bg-marka-50 disabled:cursor-not-allowed disabled:opacity-60;
   }
   .kart {
-    @apply rounded-2xl border border-cizgi bg-white p-5 sm:p-7;
+    @apply rounded-2xl border border-cizgi bg-yuzey p-5 sm:p-7;
   }
   .kutu-giris {
-    @apply block w-full rounded-xl border-2 border-cizgi bg-white px-4 py-3 text-base text-murekkep placeholder:text-gri/70 focus:border-marka-600 focus:outline-none;
+    @apply block w-full rounded-xl border-2 border-cizgi bg-yuzey px-4 py-3 text-base text-murekkep placeholder:text-gri/70 focus:border-marka-600 focus:outline-none;
   }
   .kapsayici {
     @apply mx-auto w-full max-w-5xl px-4 sm:px-6;

@@ -68,8 +68,10 @@ const SAYFALAR: Record<string, { baslik: string; icerik: () => ReactNode }> = {
           silebilirsiniz.
         </p>
         <p>
-          Olayı anlatırken adınızı, kimlik numaranızı veya sağlık bilgisi gibi özel nitelikli verileri yazmamanızı
-          rica ederiz.
+          Olayı anlatırken adınızı, kimlik numaranızı, IBAN ya da kart numaranızı veya sağlık bilgisi gibi özel
+          nitelikli verileri yazmamanızı rica ederiz. Olay anlatımı dilekçeyi yazmak için yapay zekâ servisine
+          gönderildiğinden, kimlik numarası, IBAN ve kart numarası gibi bilgiler fark edildiğinde sistem tarafından
+          kabul edilmez; bu bilgiler dilekçeye yalnızca ödemeden sonra, tarayıcınızda siz tarafından eklenir.
         </p>
 
         <h2>3. Hangi amaçla ve hangi hukuki sebeple işliyoruz?</h2>

@@ -10,10 +10,10 @@ export default function AnaSayfa() {
   return (
     <>
       {/* Giriş */}
-      <section className="bg-gradient-to-b from-marka-50 to-white">
+      <section className="bg-gradient-to-b from-marka-50 to-sayfa">
         <div className="kapsayici grid gap-10 py-12 sm:py-16 md:grid-cols-[1.2fr_1fr] md:items-center">
           <div>
-            <p className="mb-3 inline-block rounded-full bg-white px-3 py-1 text-sm font-medium text-marka-700 shadow-sm">
+            <p className="mb-3 inline-block rounded-full bg-yuzey px-3 py-1 text-sm font-medium text-marka-700 shadow-sm">
               Tüketici Hakem Heyeti başvuruları için
             </p>
             <h1 className="text-3xl leading-tight font-bold sm:text-4xl">

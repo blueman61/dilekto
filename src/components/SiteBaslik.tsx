@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { Logo } from "./Logo";
+import { TemaDugmesi } from "./TemaSecici";
 
 export function SiteBaslik({ denemeModu }: { denemeModu: boolean }) {
   return (
-    <header className="border-b border-cizgi bg-white">
+    <header className="border-b border-cizgi bg-yuzey">
       {denemeModu && (
         <div className="bg-uyari-zemin px-4 py-2 text-center text-sm text-uyari">
           <strong>Deneme sürümü:</strong> Ödeme adımında kartınızdan para çekilmez.
@@ -13,7 +14,7 @@ export function SiteBaslik({ denemeModu }: { denemeModu: boolean }) {
         <Link href="/" aria-label="Dilekto ana sayfa">
           <Logo />
         </Link>
-        <nav className="flex items-center gap-5 text-[0.95rem]">
+        <nav className="flex items-center gap-3 text-[0.95rem] sm:gap-5">
           <Link href="/nasil-calisir" className="hidden text-gri hover:text-murekkep md:inline">
             Nasıl çalışır
           </Link>
@@ -29,6 +30,7 @@ export function SiteBaslik({ denemeModu }: { denemeModu: boolean }) {
           <Link href="/olustur/hakem-heyeti" className="dugme min-h-10 px-4 py-2 text-[0.95rem]">
             Dilekçe hazırla
           </Link>
+          <TemaDugmesi />
         </nav>
       </div>
     </header>

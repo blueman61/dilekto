@@ -148,14 +148,18 @@ describe("dilekçe metni", () => {
     expect(metin).toContain("HUKUKİ NEDENLER: 6502 sayılı Tüketicinin Korunması Hakkında Kanun m. 8, m. 10, m. 11, m. 68");
     expect(metin).toContain("[TC kimlik numaranız]");
     expect(metin).toContain("UYUŞMAZLIK DEĞERİ: 12.499 TL");
-    expect(metin).toContain("1. Fatura veya satış fişi örneği");
+    expect(metin).toContain("EKLER:\n1- Fatura veya satış fişi");
     expect(yasakliBul(metin)).toEqual([]);
   });
 
-  it("PDF/Word biçimlendirmesi başlığı ortalar, imzayı sağa yaslar", () => {
+  it("PDF/Word biçimlendirmesi: makam ortalı, imza bloğu sağda, ekler solda", () => {
     const satirlar = bicimle(metin);
     expect(satirlar[0].hizalama).toBe("orta");
-    expect(satirlar[satirlar.length - 1].hizalama).toBe("sag");
+    const tarihIndex = satirlar.findIndex((s) => s.parcalar[0]?.metin.startsWith("Tarih:"));
+    const ekIndex = satirlar.findIndex((s) => s.parcalar[0]?.metin === "EKLER:");
+    expect(tarihIndex).toBeGreaterThan(0);
+    for (let i = tarihIndex; i < ekIndex; i++) expect(satirlar[i].hizalama).toBe("sag");
+    for (let i = ekIndex; i < satirlar.length; i++) expect(satirlar[i].hizalama).toBe("sol");
     const konu = satirlar.find((s) => s.parcalar[0]?.metin === "KONU:");
     expect(konu?.parcalar[0].kalin).toBe(true);
     expect(konu?.parcalar[1].kalin).toBe(false);

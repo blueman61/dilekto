@@ -3,8 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { turGetir } from "@/lib/dilekce-turleri";
 import { ILLER, tcGecerliMi } from "@/lib/dilekce-turleri/ortak";
+import { zorunluEksikler } from "@/lib/dilekce-turleri/hakem-heyeti/kurallar";
 import type { Cevaplar, Kisisel, TaslakCiktisi } from "@/lib/dilekce-turleri/tipler";
 import { dosyaAdi, dosyaIndir } from "@/lib/belge/bicim";
+import { BasvuruRehberi } from "./BasvuruRehberi";
+import { KuralKontrolu } from "./KuralKontrolu";
 
 type Props = {
   id: string;
@@ -62,9 +65,8 @@ export function Duzenleyici({ id, turId, test, hikaye, cikti }: Props) {
     if (!silindi) yerelYaz(anahtar, { kisisel, metin, duzenlendi });
   }, [anahtar, kisisel, metin, duzenlendi, silindi]);
 
-  const eksikler = tur.kisiselAlanlar
-    .filter((a) => a.zorunlu && !kisisel[a.id]?.trim())
-    .map((a) => a.etiket);
+  const kontrol = useMemo(() => tur.metniDenetle(metin), [tur, metin]);
+  const eksikZorunlu = zorunluEksikler(kontrol);
   const tcUyari = kisisel.tcKimlik && !tcGecerliMi(kisisel.tcKimlik.trim());
 
   async function indir(tip: "pdf" | "word") {
@@ -184,13 +186,16 @@ export function Duzenleyici({ id, turId, test, hikaye, cikti }: Props) {
         />
       </section>
 
+      {/* Resmî kurallara göre canlı kontrol */}
+      <KuralKontrolu maddeler={kontrol} />
+
       {/* 3. İndir */}
       <section className="kart">
-        <h2 className="text-xl font-bold">3. İndirin</h2>
-        {eksikler.length > 0 && (
-          <p className="mt-3 rounded-xl bg-uyari-zemin p-4 text-sm text-uyari">
-            Henüz doldurmadığınız bilgiler: {eksikler.join(", ")}. Yine de indirebilirsiniz; bu yerler köşeli
-            parantezle görünür.
+        <h2 className="text-xl font-bold">3. İndirin ve yazdırın</h2>
+        {eksikZorunlu.length > 0 && (
+          <p className="mt-3 rounded-xl bg-uyari-zemin p-4 text-sm text-uyari" role="status">
+            Eksik zorunlu bilgiler: {eksikZorunlu.map((m) => m.baslik).join(", ")}. Yine de indirebilirsiniz; eksik yerler
+            köşeli parantezle görünür.
           </p>
         )}
         <div className="mt-4 flex flex-col gap-3 sm:flex-row">
@@ -206,9 +211,13 @@ export function Duzenleyici({ id, turId, test, hikaye, cikti }: Props) {
             {indirmeHatasi}
           </p>
         )}
-        <p className="mt-3 text-sm text-gri">
-          e-Devlet&apos;e yüklemek için PDF&apos;i, bilgisayarda düzenlemeye devam etmek için Word&apos;ü kullanın.
-        </p>
+        <ul className="mt-3 space-y-1 text-sm text-gri">
+          <li>• e-Devlet&apos;e yüklemek için PDF&apos;i, bilgisayarda düzenlemeye devam etmek için Word&apos;ü kullanın.</li>
+          <li>
+            • Elden ya da posta ile vereceksiniz: A4 beyaz kâğıda, tek yüze, en az 2 nüsha çıktı alın ve &quot;İmza&quot; yerini
+            mavi ya da siyah tükenmez kalemle imzalayın.
+          </li>
+        </ul>
       </section>
 
       {/* Belgeler */}
@@ -239,25 +248,13 @@ export function Duzenleyici({ id, turId, test, hikaye, cikti }: Props) {
         </ul>
       </section>
 
-      {/* Başvuru adımları */}
-      <section className="kart">
-        <h2 className="text-xl font-bold">{tur.basvuruAdimlari.baslik}</h2>
-        <ol className="mt-4 space-y-3">
-          {tur.basvuruAdimlari.adimlar.map((a, i) => (
-            <li key={a} className="flex gap-3">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-marka-600 text-sm font-bold text-white">
-                {i + 1}
-              </span>
-              <span>{a}</span>
-            </li>
-          ))}
-        </ol>
-        <ul className="mt-5 space-y-1 border-t border-cizgi pt-4 text-sm text-gri">
-          {tur.basvuruAdimlari.notlar.map((n) => (
-            <li key={n}>• {n}</li>
-          ))}
-        </ul>
-      </section>
+      {/* Nereye, nasıl verilir */}
+      <BasvuruRehberi
+        yollar={tur.basvuruYollari(kisisel.il?.trim() || undefined)}
+        sonrasi={tur.basvuruSonrasi}
+        metin={metin}
+        il={kisisel.il?.trim() || undefined}
+      />
 
       <div className="text-sm text-gri">
         <button type="button" onClick={cihazdanSil} className="font-semibold text-marka-700 underline">
